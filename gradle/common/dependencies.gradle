@@ -1,0 +1,16 @@
+apply plugin: "io.spring.dependency-management"
+
+dependencyManagement {
+    dependencies {
+        dependencySet(group: 'org.jetbrains.kotlin', version: ext.kotlinVersion) {
+            entry 'kotlin-stdlib'
+            entry 'kotlin-reflect'
+        }
+
+        dependencySet(group: 'org.lwjgl', version: '3.1.1') {
+            entry 'lwjgl'
+            entry 'lwjgl-glfw'
+            entry 'lwjgl-opengl'
+        }
+    }
+}

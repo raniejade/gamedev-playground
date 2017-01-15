@@ -1,0 +1,11 @@
+apply from: "$rootDir/gradle/common/kotlin.gradle"
+
+dependencies {
+    compile 'org.lwjgl:lwjgl'
+    compile 'org.lwjgl:lwjgl-glfw'
+    compile 'org.lwjgl:lwjgl-opengl'
+
+    runtime group: 'org.lwjgl', name: 'lwjgl', classifier: 'natives-linux'
+    runtime group: 'org.lwjgl', name: 'lwjgl-glfw', classifier: 'natives-linux'
+    runtime group: 'org.lwjgl', name: 'lwjgl-opengl', classifier: 'natives-linux'
+}
