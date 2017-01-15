@@ -5,8 +5,17 @@ import org.lwjgl.glfw.GLFWErrorCallback
 import org.lwjgl.glfw.GLFWKeyCallback
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11
-import org.lwjgl.system.MemoryUtil
+import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryUtil.NULL
+
+fun stackPush(block: MemoryStack.() -> Unit) {
+    val stack = MemoryStack.stackPush()
+    try {
+        block(stack)
+    } finally {
+        stack.pop()
+    }
+}
 
 
 fun main(vararg args: String) {
@@ -49,11 +58,17 @@ fun main(vararg args: String) {
 
     glfwSetKeyCallback(window, keyCallback)
 
-    val width = MemoryUtil.memAllocInt(1)
-    val height = MemoryUtil.memAllocInt(1)
+    stackPush {
+        val width = mallocInt(1)
+        val height = mallocInt(1)
 
-    glfwGetFramebufferSize(window, width, height)
-    GL11.glViewport(0, 0, width.get(), height.get())
+        glfwGetFramebufferSize(window, width, height)
+        GL11.glViewport(0, 0, width.get(), height.get())
+    }
+
+
+
+    GL11.glClearColor(0.2f, 0.3f, 0.3f, 1.0f)
 
     while (!glfwWindowShouldClose(window)) {
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT)
