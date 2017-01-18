@@ -7,19 +7,20 @@ import kotlin.properties.Delegates
 /**
  * @author Ranie Jade Ramiso
  */
-abstract class Application {
+abstract class Application<T: ApplicationPeer, K: ApplicationListener<T>> {
     var title: String by Delegates.notNull()
 
     private var fpsCounter = FpsCounter()
 
-    private var peer = object: ApplicationPeer {
-        override fun getFps() = fpsCounter.fps()
-
+    private val peer: T by lazy {
+        wrapPeer(object: ApplicationPeer {
+            override fun getFps() = fpsCounter.fps()
+        })
     }
 
-    private val listeners = LinkedList<ApplicationListener>()
+    protected val listeners = LinkedList<K>()
 
-    fun addApplicationListener(listener: ApplicationListener) {
+    fun addApplicationListener(listener: K) {
         if (!listeners.contains(listener)) {
             listeners.add(listener)
         }
@@ -32,7 +33,7 @@ abstract class Application {
             it.peer = peer
         }
 
-        notifyListeners(ApplicationListener::setup)
+        notifyListeners(ApplicationListener<T>::setup)
 
         var timeSinceLastFrame = 0.0
 
@@ -51,7 +52,7 @@ abstract class Application {
             timeSinceLastFrame = currentTime
         }
 
-        notifyListeners(ApplicationListener::cleanup)
+        notifyListeners(ApplicationListener<T>::cleanup)
 
         cleanup()
     }
@@ -67,7 +68,9 @@ abstract class Application {
     protected abstract fun flush()
     protected abstract fun time(): Double
 
-    private inline fun notifyListeners(callback: (ApplicationListener) -> Unit) {
+    protected abstract fun wrapPeer(base: ApplicationPeer): T
+
+    protected inline fun notifyListeners(callback: (K) -> Unit) {
         listeners.forEach(callback)
     }
 }

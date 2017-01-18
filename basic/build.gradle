@@ -2,7 +2,7 @@ apply from: "$rootDir/gradle/common/kotlin.gradle"
 
 apply plugin: 'application'
 
-mainClassName = 'io.polymorphicpanda.gamedev.BasicApplicationKt'
+mainClassName = 'io.polymorphicpanda.gamedev.BasicGameKt'
 
 dependencies {
     compile project(':application')

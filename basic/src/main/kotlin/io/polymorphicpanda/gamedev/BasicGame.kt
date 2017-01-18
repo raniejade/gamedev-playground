@@ -1,15 +1,13 @@
 package io.polymorphicpanda.gamedev
 
-import org.lwjgl.glfw.GLFW
+import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL15
 import org.lwjgl.opengl.GL20
 import org.lwjgl.opengl.GL30
-import org.pandaframework.application.Application
-import org.pandaframework.application.ApplicationListener
 import org.pandaframework.application.glfw.GLFWApplication
-import org.pandaframework.application.glfw.GLFWKeyListener
+import org.pandaframework.application.glfw.GLFWApplicationListener
 import org.pandaframework.application.glfw.backend.Backend
 import org.pandaframework.application.glfw.backend.opengl.OpenGLBackend
 import org.pandaframework.asset.AssetManager
@@ -21,14 +19,9 @@ import org.pandaframework.shader.compiler.lwjgl.LWJGLShaderCompiler
 import org.pandaframework.shader.parser.yaml.YamlShaderProgramParser
 import kotlin.properties.Delegates
 
-class BasicApplication: ApplicationListener(), GLFWKeyListener {
-    override fun handleKeyEvent(window: Long, key: Int, scanCode: Int, action: Int, mods: Int) {
-        if (key == GLFW.GLFW_KEY_ESCAPE && action == GLFW.GLFW_PRESS) {
-            GLFW.glfwSetWindowShouldClose(window, true)
-        }
-    }
+class BasicGame: GLFWApplicationListener() {
 
-    private val assetManager = AssetManager(ClasspathFileHandleResolver(BasicApplication::class.java.classLoader))
+    private val assetManager = AssetManager(ClasspathFileHandleResolver(BasicGame::class.java.classLoader))
     private val shaderCompiler: ShaderCompiler = LWJGLShaderCompiler(assetManager, YamlShaderProgramParser())
 
     private var shaderProgram: ShaderProgram by Delegates.notNull()
@@ -107,19 +100,26 @@ class BasicApplication: ApplicationListener(), GLFWKeyListener {
     override fun resize(width: Int, height: Int) {
         GL11.glViewport(0, 0, width, height)
     }
+
+    override fun onKeyType(window: Long, key: Int, scanCode: Int, action: Int, mods: Int) {
+        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+            glfwSetWindowShouldClose(window, true)
+        } else if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
+//            glfwSetInputMode(window, )
+        }
+    }
 }
 
 fun main(vararg args: String) {
     val backend: Backend = OpenGLBackend.create()
         .version(3, 3)
-        .profile(GLFW.GLFW_OPENGL_CORE_PROFILE)
+        .profile(GLFW_OPENGL_CORE_PROFILE)
         .build()
 
-    val engine = BasicApplication()
-    val application: Application = GLFWApplication(backend).apply {
+    val game = BasicGame()
+    val application = GLFWApplication(backend).apply {
         title = "Basic OpenGL"
-        keyListener = engine
-        addApplicationListener(engine)
+        addApplicationListener(game)
     }
 
     application.start()

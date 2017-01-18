@@ -1,21 +1,23 @@
 package org.pandaframework.application.glfw
 
 import org.lwjgl.glfw.GLFW.*
+import org.lwjgl.glfw.GLFWCursorPosCallback
 import org.lwjgl.glfw.GLFWErrorCallback
 import org.lwjgl.glfw.GLFWKeyCallback
+import org.lwjgl.glfw.GLFWMouseButtonCallback
 import org.lwjgl.glfw.GLFWVidMode
 import org.lwjgl.glfw.GLFWWindowSizeCallback
 import org.lwjgl.system.MemoryUtil.NULL
 import org.pandaframework.application.Application
 import org.pandaframework.application.ApplicationException
+import org.pandaframework.application.ApplicationPeer
 import org.pandaframework.application.glfw.backend.Backend
 import kotlin.properties.Delegates
 
 /**
  * @author Ranie Jade Ramiso
  */
-class GLFWApplication(val backend: Backend): Application() {
-    var keyListener = GLFWKeyListener.NO_OP
+class GLFWApplication(val backend: Backend): Application<GLFWApplicationPeer, GLFWApplicationListener>() {
     var fullscreen = false
 
     private var window: Long by Delegates.notNull()
@@ -28,13 +30,28 @@ class GLFWApplication(val backend: Backend): Application() {
     }
 
     private val errorCallback = GLFWErrorCallback.create { window, description ->  }
-    private val internalKeyCallback =
+    private val keyCallback =
         GLFWKeyCallback.create { window: Long, key: Int, scanCode: Int, action: Int, mods: Int ->
-            keyListener.handleKeyEvent(window, key, scanCode, action, mods)
+            notifyListeners {
+                it.onKeyType(window, key, scanCode, action, mods)
+            }
+
         }
 
     private val resizeCallback = GLFWWindowSizeCallback.create { window, width, height ->
         onResize(width, height)
+    }
+
+    private val cursorPositionCallback = GLFWCursorPosCallback.create { window, x, y ->
+        notifyListeners {
+            it.onMouseMove(window, x, y)
+        }
+    }
+
+    private val mouseClickCallback = GLFWMouseButtonCallback.create { window, button, action, mods ->
+        notifyListeners {
+            it.onMouseClick(window, button, action, mods)
+        }
     }
 
     override fun setup() {
@@ -60,7 +77,9 @@ class GLFWApplication(val backend: Backend): Application() {
         }
 
         glfwSetWindowSizeCallback(window, resizeCallback)
-        glfwSetKeyCallback(window, internalKeyCallback)
+        glfwSetKeyCallback(window, keyCallback)
+        glfwSetCursorPosCallback(window, cursorPositionCallback)
+        glfwSetMouseButtonCallback(window, mouseClickCallback)
 
         glfwMakeContextCurrent(window)
         backend.setupContext()
@@ -69,8 +88,10 @@ class GLFWApplication(val backend: Backend): Application() {
     override fun cleanup() {
         errorCallback.free()
         backend.cleanup()
-        internalKeyCallback.free()
+        keyCallback.free()
         resizeCallback.free()
+        cursorPositionCallback.free()
+        mouseClickCallback.free()
     }
 
     override fun shouldTerminate() = glfwWindowShouldClose(window)
@@ -84,4 +105,13 @@ class GLFWApplication(val backend: Backend): Application() {
     }
 
     override fun time() = glfwGetTime()
+
+    override fun wrapPeer(base: ApplicationPeer): GLFWApplicationPeer {
+        return object: GLFWApplicationPeer(base) {
+            override val window: Long
+                get() {
+                    return this@GLFWApplication.window
+                }
+        }
+    }
 }

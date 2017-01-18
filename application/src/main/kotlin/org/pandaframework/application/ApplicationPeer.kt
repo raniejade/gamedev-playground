@@ -3,6 +3,6 @@ package org.pandaframework.application
 /**
  * @author Ranie Jade Ramiso
  */
-internal interface ApplicationPeer {
+interface ApplicationPeer {
     fun getFps(): Double
 }

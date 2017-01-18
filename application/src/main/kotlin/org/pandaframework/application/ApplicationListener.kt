@@ -5,8 +5,8 @@ import kotlin.properties.Delegates
 /**
  * @author Ranie Jade Ramiso
  */
-abstract class ApplicationListener {
-    internal var peer: ApplicationPeer by Delegates.notNull()
+abstract class ApplicationListener<T: ApplicationPeer> {
+    internal var peer: T by Delegates.notNull()
 
     open fun setup() { }
     open fun resize(width: Int, height: Int) { }
