@@ -1,11 +1,18 @@
 apply from: "$rootDir/gradle/common/kotlin.gradle"
 
+apply plugin: 'application'
+
+mainClassName = 'io.polymorphicpanda.gamedev.BasicApplicationKt'
+
 dependencies {
+    compile project(':application')
+    compile project(':application-glfw')
+    compile project(':lwjgl-util')
+
     compile 'org.lwjgl:lwjgl'
-    compile 'org.lwjgl:lwjgl-glfw'
     compile 'org.lwjgl:lwjgl-opengl'
 
     runtime group: 'org.lwjgl', name: 'lwjgl', classifier: 'natives-linux'
-    runtime group: 'org.lwjgl', name: 'lwjgl-glfw', classifier: 'natives-linux'
     runtime group: 'org.lwjgl', name: 'lwjgl-opengl', classifier: 'natives-linux'
+    runtime group: 'org.lwjgl', name: 'lwjgl-glfw', classifier: 'natives-linux'
 }

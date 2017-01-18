@@ -1,0 +1,9 @@
+apply from: "$rootDir/gradle/common/kotlin.gradle"
+
+dependencies {
+    compile project(':application')
+    compile 'org.lwjgl:lwjgl'
+    compile 'org.lwjgl:lwjgl-glfw'
+
+
+}

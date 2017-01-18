@@ -1,3 +1,8 @@
 rootProject.name = 'gamedev-playground'
 
-include 'glfw'
+include 'lwjgl-util'
+
+include 'application'
+include 'application-glfw'
+
+include 'basic'

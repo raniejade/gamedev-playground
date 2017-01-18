@@ -1,0 +1,5 @@
+apply from: "$rootDir/gradle/common/kotlin.gradle"
+
+dependencies {
+    compile 'org.lwjgl:lwjgl'
+}
