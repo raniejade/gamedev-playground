@@ -39,6 +39,10 @@ class ShaderProgramBuilder internal constructor() {
         return source(classpathResource(path, classLoader))
     }
 
+    fun classpathResource(path: String): InputStream {
+        return classpathResource(path, Thread.currentThread().contextClassLoader)
+    }
+
     fun classpathResource(path: String, classLoader: ClassLoader): InputStream {
         return classLoader.getResourceAsStream(path)
     }

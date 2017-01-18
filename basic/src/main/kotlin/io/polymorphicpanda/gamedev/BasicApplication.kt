@@ -16,7 +16,7 @@ import org.pandaframework.lwjgl.stackPush
 import org.pandaframework.shader.ShaderProgram
 import org.pandaframework.shader.compiler.ShaderCompiler
 import org.pandaframework.shader.compiler.lwjgl.LWJGLShaderCompiler
-import org.pandaframework.shader.loader.loadProgram
+import org.pandaframework.shader.loader.from
 import kotlin.properties.Delegates
 
 class BasicApplication: ApplicationListener(), GLFWKeyListener {
@@ -35,14 +35,9 @@ class BasicApplication: ApplicationListener(), GLFWKeyListener {
     override fun setup() {
         GL.createCapabilities()
 
-//        shaderProgram = shaderCompiler.createProgram {
-//            lazy()
-//
-//            attach(vertexShader(classpathSource("data/shaders/simple/simple.vert")))
-//            attach(fragmentShader(classpathSource("data/shaders/simple/simple.frag")))
-//        }
-
-        shaderProgram = shaderCompiler.loadProgram("data/shaders/simple.shader.yml", lazy = true)
+        shaderProgram = shaderCompiler.createProgram {
+            from(classpathResource("data/shaders/simple.shader.yml"))
+        }
 
         val vertices = floatArrayOf(
             0.5f,  0.5f, 0.0f,  // Top Right
