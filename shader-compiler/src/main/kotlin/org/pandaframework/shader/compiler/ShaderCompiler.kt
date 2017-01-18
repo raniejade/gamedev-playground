@@ -1,17 +1,20 @@
 package org.pandaframework.shader.compiler
 
+import org.pandaframework.asset.AssetManager
 import org.pandaframework.shader.Shader
 import org.pandaframework.shader.ShaderProgram
 import org.pandaframework.shader.ShaderSource
 import org.pandaframework.shader.ShaderType
+import org.pandaframework.shader.parser.ShaderProgramParser
 import java.util.ArrayList
 
 /**
  * @author Ranie Jade Ramiso
  */
-abstract class ShaderCompiler {
+abstract class ShaderCompiler(private val assetManager: AssetManager,
+                              private val parser: ShaderProgramParser) {
     fun createProgram(callback: ShaderProgramBuilder.() -> Unit): ShaderProgram {
-        val builder = ShaderProgramBuilder()
+        val builder = ShaderProgramBuilder(assetManager, parser)
         callback.invoke(builder)
 
         return if (builder.lazy) {

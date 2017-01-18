@@ -1,7 +1,6 @@
-package org.pandaframework.shader.loader.parser
+package org.pandaframework.shader.parser
 
 import org.pandaframework.shader.ShaderType
-
 
 data class ShaderDescriptor(
     val source: CharSequence,

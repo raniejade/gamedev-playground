@@ -1,7 +1,6 @@
 version: 330 core
 
 vertex:
-  partials: []
   source: |
     layout (location = 0) in vec3 position;
 
@@ -10,7 +9,6 @@ vertex:
     }
 
 fragment:
-  partials: []
   source: |
     out vec4 color;
 

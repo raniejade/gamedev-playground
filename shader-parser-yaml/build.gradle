@@ -1,7 +1,7 @@
 apply from: "$rootDir/gradle/common/kotlin.gradle"
 
 dependencies {
-    compile project(':shader-loader')
+    compile project(':shader-compiler')
 
     compile 'com.fasterxml.jackson.core:jackson-databind'
     compile 'com.fasterxml.jackson.module:jackson-module-kotlin'

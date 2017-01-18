@@ -12,11 +12,13 @@ import org.pandaframework.application.glfw.GLFWApplication
 import org.pandaframework.application.glfw.GLFWKeyListener
 import org.pandaframework.application.glfw.backend.Backend
 import org.pandaframework.application.glfw.backend.opengl.OpenGLBackend
+import org.pandaframework.asset.AssetManager
+import org.pandaframework.asset.classpath.ClasspathFileHandleResolver
 import org.pandaframework.lwjgl.stackPush
 import org.pandaframework.shader.ShaderProgram
 import org.pandaframework.shader.compiler.ShaderCompiler
 import org.pandaframework.shader.compiler.lwjgl.LWJGLShaderCompiler
-import org.pandaframework.shader.loader.from
+import org.pandaframework.shader.parser.yaml.YamlShaderProgramParser
 import kotlin.properties.Delegates
 
 class BasicApplication: ApplicationListener(), GLFWKeyListener {
@@ -26,17 +28,18 @@ class BasicApplication: ApplicationListener(), GLFWKeyListener {
         }
     }
 
+    private val assetManager = AssetManager(ClasspathFileHandleResolver(BasicApplication::class.java.classLoader))
+    private val shaderCompiler: ShaderCompiler = LWJGLShaderCompiler(assetManager, YamlShaderProgramParser())
+
     private var shaderProgram: ShaderProgram by Delegates.notNull()
-
     private var vao: Int by Delegates.notNull()
-
-    private val shaderCompiler: ShaderCompiler = LWJGLShaderCompiler()
 
     override fun setup() {
         GL.createCapabilities()
 
         shaderProgram = shaderCompiler.createProgram {
-            from(classpathResource("data/shaders/simple.shader.yml"))
+            lazy()
+            from("data/shaders/simple.shader.yml")
         }
 
         val vertices = floatArrayOf(

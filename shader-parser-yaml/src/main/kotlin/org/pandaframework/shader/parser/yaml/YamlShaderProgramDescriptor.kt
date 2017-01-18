@@ -1,4 +1,4 @@
-package org.pandaframework.shader.loader.yaml.parser
+package org.pandaframework.shader.parser.yaml
 
 /**
  * @author Ranie Jade Ramiso
