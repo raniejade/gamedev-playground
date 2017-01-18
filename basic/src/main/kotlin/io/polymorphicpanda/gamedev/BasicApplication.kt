@@ -13,16 +13,10 @@ import org.pandaframework.application.glfw.GLFWKeyListener
 import org.pandaframework.application.glfw.backend.Backend
 import org.pandaframework.application.glfw.backend.opengl.OpenGLBackend
 import org.pandaframework.lwjgl.stackPush
-import java.io.InputStreamReader
+import org.pandaframework.shader.ShaderProgram
+import org.pandaframework.shader.compiler.ShaderCompiler
+import org.pandaframework.shader.lwjgl.LWJGLShaderCompiler
 import kotlin.properties.Delegates
-
-object MyFileReader {
-    fun read(path: String): String {
-        return InputStreamReader(MyFileReader::class.java.classLoader.getResourceAsStream(path))
-            .readText()
-    }
-}
-
 
 class BasicApplication: ApplicationListener(), GLFWKeyListener {
     override fun handleKeyEvent(window: Long, key: Int, scanCode: Int, action: Int, mods: Int) {
@@ -31,38 +25,22 @@ class BasicApplication: ApplicationListener(), GLFWKeyListener {
         }
     }
 
-    private var shaderProgram: Int by Delegates.notNull()
+    private var shaderProgram: ShaderProgram by Delegates.notNull()
+
     private var vao: Int by Delegates.notNull()
+
+    private val shaderCompiler: ShaderCompiler = LWJGLShaderCompiler()
 
     override fun setup() {
         GL.createCapabilities()
 
         // shader
-        val vertexShader = GL20.glCreateShader(GL20.GL_VERTEX_SHADER)
-        GL20.glShaderSource(vertexShader, MyFileReader.read("vertex.glsl"))
-        GL20.glCompileShader(vertexShader)
+        shaderProgram = shaderCompiler.createProgram {
+            lazy()
 
-        if (GL20.glGetShaderi(vertexShader, GL20.GL_COMPILE_STATUS) != GL11.GL_TRUE) {
-            throw RuntimeException(GL20.glGetShaderInfoLog(vertexShader))
+            attach(vertexShader(classpathSource("vertex.glsl")))
+            attach(fragmentShader(classpathSource("fragment.glsl")))
         }
-
-        val fragmentShader = GL20.glCreateShader(GL20.GL_FRAGMENT_SHADER)
-        GL20.glShaderSource(fragmentShader, MyFileReader.read("fragment.glsl"))
-        GL20.glCompileShader(fragmentShader)
-        if (GL20.glGetShaderi(vertexShader, GL20.GL_COMPILE_STATUS) != GL11.GL_TRUE) {
-            throw RuntimeException(GL20.glGetShaderInfoLog(fragmentShader))
-        }
-
-        shaderProgram = GL20.glCreateProgram()
-        GL20.glAttachShader(shaderProgram, vertexShader)
-        GL20.glAttachShader(shaderProgram, fragmentShader)
-        GL20.glLinkProgram(shaderProgram)
-
-        if (GL20.glGetProgrami(shaderProgram, GL20.GL_LINK_STATUS) != GL11.GL_TRUE) {
-            throw RuntimeException()
-        }
-        GL20.glDeleteShader(vertexShader)
-        GL20.glDeleteShader(fragmentShader)
 
         val vertices = floatArrayOf(
             0.5f,  0.5f, 0.0f,  // Top Right
@@ -114,10 +92,16 @@ class BasicApplication: ApplicationListener(), GLFWKeyListener {
     override fun update(time: Double) {
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT)
 
-        GL20.glUseProgram(shaderProgram)
-        GL30.glBindVertexArray(vao)
-        GL11.glDrawElements(GL11.GL_TRIANGLES, 6, GL11.GL_UNSIGNED_INT, 0)
-        GL30.glBindVertexArray(0)
+        shaderProgram.use {
+            GL30.glBindVertexArray(vao)
+            GL11.glDrawElements(GL11.GL_TRIANGLES, 6, GL11.GL_UNSIGNED_INT, 0)
+            GL30.glBindVertexArray(0)
+        }
+
+    }
+
+    override fun cleanup() {
+        shaderProgram.delete()
     }
 
     override fun resize(width: Int, height: Int) {

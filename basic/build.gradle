@@ -9,6 +9,9 @@ dependencies {
     compile project(':application-glfw')
     compile project(':lwjgl-util')
 
+    compile project(':shader')
+    compile project(':shader-lwjgl')
+
     compile 'org.lwjgl:lwjgl'
     compile 'org.lwjgl:lwjgl-opengl'
 
