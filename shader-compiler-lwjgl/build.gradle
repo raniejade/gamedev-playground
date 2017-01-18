@@ -1,0 +1,8 @@
+apply from: "$rootDir/gradle/common/kotlin.gradle"
+
+dependencies {
+    compile project(':shader-compiler')
+
+    compile 'org.lwjgl:lwjgl'
+    compile 'org.lwjgl:lwjgl-opengl'
+}

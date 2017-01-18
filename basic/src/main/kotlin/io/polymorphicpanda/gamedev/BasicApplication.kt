@@ -15,7 +15,8 @@ import org.pandaframework.application.glfw.backend.opengl.OpenGLBackend
 import org.pandaframework.lwjgl.stackPush
 import org.pandaframework.shader.ShaderProgram
 import org.pandaframework.shader.compiler.ShaderCompiler
-import org.pandaframework.shader.lwjgl.LWJGLShaderCompiler
+import org.pandaframework.shader.compiler.lwjgl.LWJGLShaderCompiler
+import org.pandaframework.shader.loader.loadProgram
 import kotlin.properties.Delegates
 
 class BasicApplication: ApplicationListener(), GLFWKeyListener {
@@ -34,13 +35,14 @@ class BasicApplication: ApplicationListener(), GLFWKeyListener {
     override fun setup() {
         GL.createCapabilities()
 
-        // shader
-        shaderProgram = shaderCompiler.createProgram {
-            lazy()
+//        shaderProgram = shaderCompiler.createProgram {
+//            lazy()
+//
+//            attach(vertexShader(classpathSource("data/shaders/simple/simple.vert")))
+//            attach(fragmentShader(classpathSource("data/shaders/simple/simple.frag")))
+//        }
 
-            attach(vertexShader(classpathSource("vertex.glsl")))
-            attach(fragmentShader(classpathSource("fragment.glsl")))
-        }
+        shaderProgram = shaderCompiler.loadProgram("data/shaders/simple.shader.yml", lazy = true)
 
         val vertices = floatArrayOf(
             0.5f,  0.5f, 0.0f,  // Top Right

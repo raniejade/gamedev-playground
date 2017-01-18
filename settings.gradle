@@ -2,8 +2,11 @@ rootProject.name = 'gamedev-playground'
 
 include 'lwjgl-util'
 
-include 'shader'
-include 'shader-lwjgl'
+include 'shader-compiler'
+include 'shader-compiler-lwjgl'
+
+include 'shader-loader'
+include 'shader-loader-yaml'
 
 include 'application'
 include 'application-glfw'
