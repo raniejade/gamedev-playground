@@ -2,19 +2,16 @@ package org.pandaframework.shader.compiler.lwjgl
 
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL20
-import org.pandaframework.asset.AssetManager
 import org.pandaframework.shader.ShaderSource
 import org.pandaframework.shader.ShaderType
-import org.pandaframework.shader.compiler.CompileResult
-import org.pandaframework.shader.compiler.LinkResult
-import org.pandaframework.shader.compiler.ShaderCompiler
-import org.pandaframework.shader.parser.ShaderProgramParser
+import org.pandaframework.shader.backend.CompileResult
+import org.pandaframework.shader.backend.LinkResult
+import org.pandaframework.shader.backend.ShaderCompilerBackend
 
 /**
  * @author Ranie Jade Ramiso
  */
-class LWJGLShaderCompiler(assetManager: AssetManager,
-                          parser: ShaderProgramParser): ShaderCompiler(assetManager, parser) {
+class LWJGLShaderCompilerBackend: ShaderCompilerBackend {
     override fun createProgram() = GL20.glCreateProgram()
 
     override fun createShader(type: ShaderType): Int {

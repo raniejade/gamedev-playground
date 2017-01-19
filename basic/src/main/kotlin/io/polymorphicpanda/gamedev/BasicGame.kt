@@ -11,18 +11,21 @@ import org.pandaframework.application.glfw.GLFWApplicationListener
 import org.pandaframework.application.glfw.backend.Backend
 import org.pandaframework.application.glfw.backend.opengl.OpenGLBackend
 import org.pandaframework.asset.AssetManager
-import org.pandaframework.asset.classpath.ClasspathFileHandleResolver
+import org.pandaframework.asset.ClasspathAssetDirectory
 import org.pandaframework.lwjgl.stackPush
+import org.pandaframework.shader.ShaderCompiler
 import org.pandaframework.shader.ShaderProgram
-import org.pandaframework.shader.compiler.ShaderCompiler
-import org.pandaframework.shader.compiler.lwjgl.LWJGLShaderCompiler
-import org.pandaframework.shader.parser.yaml.YamlShaderProgramParser
+import org.pandaframework.shader.compiler.lwjgl.LWJGLShaderCompilerBackend
 import kotlin.properties.Delegates
 
 class BasicGame: GLFWApplicationListener() {
 
-    private val assetManager = AssetManager(ClasspathFileHandleResolver(BasicGame::class.java.classLoader))
-    private val shaderCompiler: ShaderCompiler = LWJGLShaderCompiler(assetManager, YamlShaderProgramParser())
+    private val assetManager by lazy {
+        AssetManager(ClasspathAssetDirectory("data", BasicGame::class.java.classLoader))
+    }
+    private val shaderCompiler by lazy {
+        ShaderCompiler(LWJGLShaderCompilerBackend(), assetManager.directory("shaders"))
+    }
 
     private var shaderProgram: ShaderProgram by Delegates.notNull()
     private var vao: Int by Delegates.notNull()
@@ -30,10 +33,7 @@ class BasicGame: GLFWApplicationListener() {
     override fun setup() {
         GL.createCapabilities()
 
-        shaderProgram = shaderCompiler.createProgram {
-            lazy()
-            from("data/shaders/simple.shader.yml")
-        }
+        shaderProgram = shaderCompiler.compile("basic")
 
         val vertices = floatArrayOf(
             0.5f,  0.5f, 0.0f,  // Top Right

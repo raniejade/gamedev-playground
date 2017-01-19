@@ -1,0 +1,9 @@
+version: 330 core
+shaders:
+  - type: vertex
+    partials: [sample.glsl]
+    path: basic.vert
+  - type: fragment
+    partials: [sample.glsl]
+    path: basic.frag
+

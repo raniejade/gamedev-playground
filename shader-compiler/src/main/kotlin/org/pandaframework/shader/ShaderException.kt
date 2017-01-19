@@ -1,4 +1,4 @@
-package org.pandaframework.shader.compiler
+package org.pandaframework.shader
 
 /**
  * @author Ranie Jade Ramiso

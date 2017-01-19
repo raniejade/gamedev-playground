@@ -1,9 +1,9 @@
-package org.pandaframework.shader.parser
+package org.pandaframework.shader.metadata
 
 import org.pandaframework.shader.ShaderType
 
-data class ShaderDescriptor(
-    val source: CharSequence,
+internal data class ShaderMetadata(
+    val path: String,
     val partials: List<String>,
     val type: ShaderType
 )

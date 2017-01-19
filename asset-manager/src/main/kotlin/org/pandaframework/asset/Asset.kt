@@ -5,6 +5,6 @@ import java.io.InputStream
 /**
  * @author Ranie Jade Ramiso
  */
-interface FileHandle {
+interface Asset {
     fun inputStream(): InputStream
 }
