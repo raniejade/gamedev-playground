@@ -1,7 +1,7 @@
 package org.pandaframework.application
 
 import org.pandaframework.application.util.FpsCounter
-import java.util.LinkedList
+import java.util.*
 import kotlin.properties.Delegates
 
 /**
@@ -11,6 +11,7 @@ abstract class Application<T: ApplicationPeer, K: ApplicationListener<T>> {
     var title: String by Delegates.notNull()
 
     private var fpsCounter = FpsCounter()
+    private var initialized = false
 
     private val peer: T by lazy {
         wrapPeer(object: ApplicationPeer {
@@ -27,39 +28,51 @@ abstract class Application<T: ApplicationPeer, K: ApplicationListener<T>> {
     }
 
     fun start() {
-        setup()
 
-        notifyListeners {
-            it.peer = peer
+        val success = runSafely {
+            setup()
+            notifyListeners {
+                it.peer = peer
+                it.setup()
+            }
         }
 
-        notifyListeners(ApplicationListener<T>::setup)
+        if (success) {
+            initialized = true
+            var timeSinceLastFrame = 0.0
 
-        var timeSinceLastFrame = 0.0
+            while (!shouldTerminate()) {
+                runSafely {
+                    val currentTime = time()
+                    val timeDelta = currentTime - timeSinceLastFrame
 
-        while (!shouldTerminate()) {
-            val currentTime = time()
-            val timeDelta = currentTime - timeSinceLastFrame
+                    fpsCounter.update(timeDelta)
 
-            fpsCounter.update(timeDelta)
+                    pollEvents()
 
-            pollEvents()
+                    notifyListeners { it.update(timeDelta) }
 
-            notifyListeners { it.update(timeDelta) }
+                    flush()
 
-            flush()
+                    timeSinceLastFrame = currentTime
+                }
 
-            timeSinceLastFrame = currentTime
+            }
         }
 
-        notifyListeners(ApplicationListener<T>::cleanup)
 
-        cleanup()
+        // run cleanup regardless
+        runSafely {
+            notifyListeners(ApplicationListener<T>::cleanup)
+            cleanup()
+        }
     }
 
     protected fun onResize(width: Int, height: Int) {
         notifyListeners { it.resize(width, height) }
     }
+
+    protected fun isInitialized() = initialized
 
     protected abstract fun setup()
     protected abstract fun cleanup()
@@ -67,10 +80,25 @@ abstract class Application<T: ApplicationPeer, K: ApplicationListener<T>> {
     protected abstract fun pollEvents()
     protected abstract fun flush()
     protected abstract fun time(): Double
+    protected abstract fun requestShutdown()
 
     protected abstract fun wrapPeer(base: ApplicationPeer): T
 
     protected inline fun notifyListeners(callback: (K) -> Unit) {
         listeners.forEach(callback)
+    }
+
+    private inline fun runSafely(block: () -> Unit): Boolean {
+        try {
+            block()
+            return true
+        } catch (e: Throwable) {
+            val wrapped = ApplicationException(e)
+
+            notifyListeners {
+                it.handleError(wrapped)
+            }
+        }
+        return false
     }
 }

@@ -1,15 +1,9 @@
 package org.pandaframework.application.glfw
 
+import org.lwjgl.glfw.*
 import org.lwjgl.glfw.GLFW.*
-import org.lwjgl.glfw.GLFWCursorPosCallback
-import org.lwjgl.glfw.GLFWErrorCallback
-import org.lwjgl.glfw.GLFWKeyCallback
-import org.lwjgl.glfw.GLFWMouseButtonCallback
-import org.lwjgl.glfw.GLFWVidMode
-import org.lwjgl.glfw.GLFWWindowSizeCallback
 import org.lwjgl.system.MemoryUtil.NULL
 import org.pandaframework.application.Application
-import org.pandaframework.application.ApplicationException
 import org.pandaframework.application.ApplicationPeer
 import org.pandaframework.application.glfw.backend.Backend
 import kotlin.properties.Delegates
@@ -57,7 +51,7 @@ class GLFWApplication(val backend: Backend): Application<GLFWApplicationPeer, GL
 
     override fun setup() {
         if (!glfwInit()) {
-            throw ApplicationException("Failed to initialize GLFW.")
+            throw GLFWApplicationException("Failed to initialize GLFW.")
         }
 
         glfwSetErrorCallback(errorCallback)
@@ -73,8 +67,7 @@ class GLFWApplication(val backend: Backend): Application<GLFWApplicationPeer, GL
         window = glfwCreateWindow(videoMode.width(), videoMode.height(), title, monitor, NULL)
 
         if (window == NULL) {
-            glfwTerminate()
-            throw ApplicationException("Failed to create a window.")
+            throw GLFWApplicationException("Failed to create a window.")
         }
 
         glfwSetWindowSizeCallback(window, resizeCallback)
@@ -93,6 +86,7 @@ class GLFWApplication(val backend: Backend): Application<GLFWApplicationPeer, GL
         resizeCallback.free()
         cursorPositionCallback.free()
         mouseClickCallback.free()
+        glfwTerminate()
     }
 
     override fun shouldTerminate() = glfwWindowShouldClose(window)
@@ -103,6 +97,12 @@ class GLFWApplication(val backend: Backend): Application<GLFWApplicationPeer, GL
 
     override fun flush() {
         glfwSwapBuffers(window)
+    }
+
+    override fun requestShutdown() {
+        if (isInitialized()) {
+            glfwSetWindowShouldClose(window, true)
+        }
     }
 
     override fun time() = glfwGetTime()
