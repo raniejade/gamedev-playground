@@ -28,7 +28,7 @@ class GLFWApplication(val backend: Backend): Application<GLFWApplicationPeer, GL
     private val keyCallback =
         GLFWKeyCallback.create { window: Long, key: Int, scanCode: Int, action: Int, mods: Int ->
             notifyListeners {
-                it.onKeyType(window, key, scanCode, action, mods)
+                it.onKeyType(key, scanCode, action, mods)
             }
 
         }
@@ -39,13 +39,13 @@ class GLFWApplication(val backend: Backend): Application<GLFWApplicationPeer, GL
 
     private val cursorPositionCallback = GLFWCursorPosCallback.create { window, x, y ->
         notifyListeners {
-            it.onMouseMove(window, x, y)
+            it.onMouseMove(x, y)
         }
     }
 
     private val mouseClickCallback = GLFWMouseButtonCallback.create { window, button, action, mods ->
         notifyListeners {
-            it.onMouseClick(window, button, action, mods)
+            it.onMouseClick(button, action, mods)
         }
     }
 

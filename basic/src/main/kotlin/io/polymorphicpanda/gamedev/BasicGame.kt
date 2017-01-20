@@ -101,7 +101,7 @@ class BasicGame: GLFWApplicationListener() {
         GL11.glViewport(0, 0, width, height)
     }
 
-    override fun onKeyType(window: Long, key: Int, scanCode: Int, action: Int, mods: Int) {
+    override fun onKeyType(key: Int, scanCode: Int, action: Int, mods: Int) {
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
             glfwSetWindowShouldClose(window, true)
         } else if (key == GLFW_KEY_1 && action == GLFW_PRESS) {

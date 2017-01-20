@@ -17,5 +17,7 @@ abstract class ApplicationListener<T: ApplicationPeer> {
         e.printStackTrace()
     }
 
-    fun getFps() = peer.getFps()
+    fun getFps() = getPeer().getFps()
+
+    protected fun getPeer() = peer
 }
