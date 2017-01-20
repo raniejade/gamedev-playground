@@ -1,3 +1,5 @@
+import org.gradle.internal.os.OperatingSystem
+
 buildscript {
     repositories {
         mavenCentral()
@@ -15,6 +17,16 @@ buildscript {
 
 subprojects {
     apply from: "$rootDir/gradle/common/dependencies.gradle"
+
+    def os = OperatingSystem.current()
+
+    if (os.isLinux()) {
+        ext.os = "linux"
+    } else if (os.isMacOsX()) {
+        ext.set('os', 'macos')
+    } else if (os.isWindows()) {
+        ext.os = 'windows'
+    }
 
     repositories {
         mavenCentral()

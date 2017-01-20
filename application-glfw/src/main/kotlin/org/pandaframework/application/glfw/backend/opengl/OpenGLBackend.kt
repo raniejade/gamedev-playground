@@ -9,6 +9,7 @@ import org.pandaframework.application.glfw.backend.Backend
 class OpenGLBackend private constructor(
     val version: Pair<Int, Int>?,
     val profile: Int,
+    val forwardCompatible: Boolean,
     val vsync: Boolean
 ): Backend {
     override fun setupWindowHints() {
@@ -16,6 +17,10 @@ class OpenGLBackend private constructor(
         if (version != null) {
             glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, version.first)
             glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, version.second)
+        }
+
+        if (forwardCompatible) {
+            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE)
         }
 
         glfwWindowHint(GLFW_OPENGL_PROFILE, profile)
@@ -33,8 +38,9 @@ class OpenGLBackend private constructor(
 
     class Builder internal constructor() {
         private var version: Pair<Int, Int>? = null
-        private var profile: Int = GLFW_OPENGL_ANY_PROFILE
-        private var vsync: Boolean = true
+        private var profile = GLFW_OPENGL_ANY_PROFILE
+        private var vsync = true
+        private var forwardCompatible = false
 
         fun version(major: Int, minor: Int): Builder {
             version = Pair(major, minor)
@@ -51,7 +57,12 @@ class OpenGLBackend private constructor(
             return this
         }
 
-        fun build() = OpenGLBackend(version, profile, vsync)
+        fun forwardCompatible(enabled: Boolean): Builder {
+            forwardCompatible = enabled
+            return this
+        }
+
+        fun build() = OpenGLBackend(version, profile, forwardCompatible, vsync)
     }
 
     companion object {

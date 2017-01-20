@@ -29,7 +29,8 @@ class GLFWApplication(val backend: Backend): Application<GLFWApplicationPeer, GL
         glfwGetVideoMode(monitor)
     }
 
-    private val errorCallback = GLFWErrorCallback.create { window, description ->  }
+    private val errorCallback = GLFWErrorCallback.createPrint(System.err)
+
     private val keyCallback =
         GLFWKeyCallback.create { window: Long, key: Int, scanCode: Int, action: Int, mods: Int ->
             notifyListeners {

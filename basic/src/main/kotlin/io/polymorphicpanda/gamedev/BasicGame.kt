@@ -31,7 +31,7 @@ class BasicGame: GLFWApplicationListener() {
     private var vao: Int by Delegates.notNull()
 
     override fun setup() {
-        GL.createCapabilities()
+        GL.createCapabilities(false)
 
         shaderProgram = shaderCompiler.compile("basic")
 
@@ -114,6 +114,7 @@ fun main(vararg args: String) {
     val backend: Backend = OpenGLBackend.create()
         .version(3, 3)
         .profile(GLFW_OPENGL_CORE_PROFILE)
+        .forwardCompatible(true) /* true for OSX */
         .build()
 
     val game = BasicGame()
