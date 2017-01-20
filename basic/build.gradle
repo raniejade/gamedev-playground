@@ -15,7 +15,6 @@ dependencies {
 
     compile project(':shader-compiler')
     compile project(':shader-compiler-lwjgl')
-    compile project(':shader-parser-yaml')
 
     compile 'org.lwjgl:lwjgl'
     compile 'org.lwjgl:lwjgl-opengl'

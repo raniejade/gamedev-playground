@@ -6,7 +6,6 @@ include 'asset-manager'
 
 include 'shader-compiler'
 include 'shader-compiler-lwjgl'
-include 'shader-parser-yaml'
 
 include 'application'
 include 'application-glfw'
