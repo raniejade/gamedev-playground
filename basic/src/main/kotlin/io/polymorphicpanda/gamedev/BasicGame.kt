@@ -105,7 +105,11 @@ class BasicGame: GLFWApplicationListener() {
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
             glfwSetWindowShouldClose(window, true)
         } else if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
-//            glfwSetInputMode(window, )
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL)
+        } else if (key == GLFW_KEY_2 && action == GLFW_PRESS) {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN)
+        } else if (key == GLFW_KEY_3 && action == GLFW_PRESS) {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED)
         }
     }
 }
