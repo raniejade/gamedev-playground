@@ -68,14 +68,6 @@ abstract class Shader(val backend: ShaderBackend,
 
     }
 
-    fun use(callback: () -> Unit) {
-        with(backend) {
-            useProgram(program)
-            callback.invoke()
-            useProgram(0)
-        }
-    }
-
     fun delete() {
         with(backend) {
             deleteProgram(program)
@@ -121,4 +113,12 @@ abstract class Shader(val backend: ShaderBackend,
         get() {
             return this::class.simpleName!!
         }
+}
+
+inline fun <reified T: Shader> using(shader: T, block: T.() -> Unit) {
+    with(shader.backend) {
+        useProgram(shader.program)
+        block.invoke(shader)
+        useProgram(0)
+    }
 }

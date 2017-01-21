@@ -12,6 +12,7 @@ import org.pandaframework.application.glfw.GLFWApplicationListener
 import org.pandaframework.application.glfw.backend.Backend
 import org.pandaframework.application.glfw.backend.opengl.OpenGLBackend
 import org.pandaframework.lwjgl.stackPush
+import org.pandaframework.shader.using
 import kotlin.properties.Delegates
 
 class BasicGame: GLFWApplicationListener() {
@@ -71,7 +72,7 @@ class BasicGame: GLFWApplicationListener() {
     override fun update(time: Double) {
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT)
 
-        shader.use {
+        using(shader) {
             GL30.glBindVertexArray(vao)
             GL11.glDrawElements(GL11.GL_TRIANGLES, 6, GL11.GL_UNSIGNED_INT, 0)
             GL30.glBindVertexArray(0)
