@@ -15,9 +15,14 @@ abstract class ApplicationListener<T: ApplicationPeer> {
 
     open fun handleError(e: ApplicationException) {
         e.printStackTrace()
+        requestShutdown()
     }
 
     fun getFps() = getPeer().getFps()
+
+    fun requestShutdown() {
+        peer.requestShutdown()
+    }
 
     protected fun getPeer() = peer
 }

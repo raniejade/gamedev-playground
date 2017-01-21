@@ -13,8 +13,8 @@ dependencies {
     compile project(':application-glfw')
     compile project(':lwjgl-util')
 
-    compile project(':shader-compiler')
-    compile project(':shader-compiler-lwjgl')
+    compile project(':shader')
+    compile project(':shader-backend-lwjgl')
 
     compile 'org.lwjgl:lwjgl'
     compile 'org.lwjgl:lwjgl-opengl'

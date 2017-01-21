@@ -1,5 +1,6 @@
 package io.polymorphicpanda.gamedev
 
+import io.polymorphicpanda.gamedev.shaders.BasicShader
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11
@@ -10,30 +11,15 @@ import org.pandaframework.application.glfw.GLFWApplication
 import org.pandaframework.application.glfw.GLFWApplicationListener
 import org.pandaframework.application.glfw.backend.Backend
 import org.pandaframework.application.glfw.backend.opengl.OpenGLBackend
-import org.pandaframework.asset.AssetManager
-import org.pandaframework.asset.ClasspathAssetDirectory
 import org.pandaframework.lwjgl.stackPush
-import org.pandaframework.shader.ShaderCompiler
-import org.pandaframework.shader.ShaderProgram
-import org.pandaframework.shader.compiler.lwjgl.LWJGLShaderCompilerBackend
 import kotlin.properties.Delegates
 
 class BasicGame: GLFWApplicationListener() {
-
-    private val assetManager by lazy {
-        AssetManager(ClasspathAssetDirectory("data", BasicGame::class.java.classLoader))
-    }
-    private val shaderCompiler by lazy {
-        ShaderCompiler(LWJGLShaderCompilerBackend(), assetManager.directory("shaders"))
-    }
-
-    private var shaderProgram: ShaderProgram by Delegates.notNull()
+    private var shader = BasicShader()
     private var vao: Int by Delegates.notNull()
 
     override fun setup() {
         GL.createCapabilities(false)
-
-        shaderProgram = shaderCompiler.compile("basic")
 
         val vertices = floatArrayOf(
             0.5f,  0.5f, 0.0f,  // Top Right
@@ -85,7 +71,7 @@ class BasicGame: GLFWApplicationListener() {
     override fun update(time: Double) {
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT)
 
-        shaderProgram.use {
+        shader.use {
             GL30.glBindVertexArray(vao)
             GL11.glDrawElements(GL11.GL_TRIANGLES, 6, GL11.GL_UNSIGNED_INT, 0)
             GL30.glBindVertexArray(0)
@@ -94,7 +80,7 @@ class BasicGame: GLFWApplicationListener() {
     }
 
     override fun cleanup() {
-        shaderProgram.delete()
+        shader.delete()
     }
 
     override fun resize(width: Int, height: Int) {

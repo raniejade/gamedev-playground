@@ -1,7 +1,7 @@
 package org.pandaframework.application
 
 import org.pandaframework.application.util.FpsCounter
-import java.util.*
+import java.util.LinkedList
 import kotlin.properties.Delegates
 
 /**
@@ -15,6 +15,10 @@ abstract class Application<T: ApplicationPeer, K: ApplicationListener<T>> {
 
     private val peer: T by lazy {
         wrapPeer(object: ApplicationPeer {
+            override fun requestShutdown() {
+                this@Application.requestShutdown()
+            }
+
             override fun getFps() = fpsCounter.fps()
         })
     }

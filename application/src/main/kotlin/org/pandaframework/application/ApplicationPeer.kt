@@ -5,4 +5,5 @@ package org.pandaframework.application
  */
 interface ApplicationPeer {
     fun getFps(): Double
+    fun requestShutdown()
 }
