@@ -11,4 +11,5 @@ interface ShaderBackend {
     fun deleteShader(shader: Int)
     fun deleteProgram(program: Int)
     fun useProgram(program: Int)
+    fun getUniformLocation(program: Int, name: String): Int
 }

@@ -50,6 +50,10 @@ class LWJGLShaderBackend: ShaderBackend {
         GL20.glUseProgram(program)
     }
 
+    override fun getUniformLocation(program: Int, name: String): Int {
+        return GL20.glGetUniformLocation(program, name)
+    }
+
     private fun toShaderType(stage: ShaderStage): Int {
         return when (stage) {
             ShaderStage.Vertex -> GL20.GL_VERTEX_SHADER

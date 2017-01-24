@@ -31,7 +31,7 @@ abstract class Shader(val backend: ShaderBackend,
     fun ShaderSourceBuilder.contents() = contents(className)
 
     private fun compileProgram(): Int {
-        val shaders = ArrayList<Int>()
+        val shaders = mutableListOf<Int>()
 
         return with(backend) {
             var compileError: CompileResult.Error? = null
