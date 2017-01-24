@@ -1,6 +1,7 @@
 package io.polymorphicpanda.gamedev
 
 import io.polymorphicpanda.gamedev.shaders.BasicShader
+import org.joml.Math
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11
@@ -73,6 +74,9 @@ class BasicGame: GLFWApplicationListener() {
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT)
 
         using(shader) {
+            val greenValue = Math.sin(glfwGetTime() / 2) + 0.5
+            GL20.glUniform4f(ourColor, 0.0f, greenValue.toFloat(), 0.0f, 1.0f)
+
             GL30.glBindVertexArray(vao)
             GL11.glDrawElements(GL11.GL_TRIANGLES, 6, GL11.GL_UNSIGNED_INT, 0)
             GL30.glBindVertexArray(0)

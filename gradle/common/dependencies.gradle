@@ -13,8 +13,6 @@ dependencyManagement {
             entry 'lwjgl-opengl'
         }
 
-        dependency 'com.fasterxml.jackson.core:jackson-databind:2.8.6'
-        dependency 'com.fasterxml.jackson.module:jackson-module-kotlin:2.8.6'
-        dependency 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.8.6'
+        dependency 'org.joml:joml:1.9.1'
     }
 }

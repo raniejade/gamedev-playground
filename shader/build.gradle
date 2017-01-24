@@ -1,7 +1,1 @@
 apply from: "$rootDir/gradle/common/kotlin.gradle"
-
-dependencies {
-    compile 'com.fasterxml.jackson.core:jackson-databind'
-    compile 'com.fasterxml.jackson.module:jackson-module-kotlin'
-    compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
-}
