@@ -2,12 +2,10 @@ package io.polymorphicpanda.gamedev
 
 import io.polymorphicpanda.gamedev.shaders.BasicShader
 import org.joml.Math
+import org.joml.Matrix4f
+import org.joml.Vector3f
 import org.lwjgl.glfw.GLFW.*
-import org.lwjgl.opengl.GL
-import org.lwjgl.opengl.GL11
-import org.lwjgl.opengl.GL15
-import org.lwjgl.opengl.GL20
-import org.lwjgl.opengl.GL30
+import org.lwjgl.opengl.*
 import org.pandaframework.application.glfw.GLFWApplication
 import org.pandaframework.application.glfw.GLFWApplicationListener
 import org.pandaframework.application.glfw.backend.Backend
@@ -19,6 +17,10 @@ import kotlin.properties.Delegates
 class BasicGame: GLFWApplicationListener() {
     private var shader = BasicShader()
     private var vao: Int by Delegates.notNull()
+
+    private var modelMatrix = Matrix4f()
+    private var viewMatrix = Matrix4f()
+    private var projectionMatrix = Matrix4f()
 
     override fun setup() {
         GL.createCapabilities(false)
@@ -64,6 +66,14 @@ class BasicGame: GLFWApplicationListener() {
             GL30.glBindVertexArray(0)
         }
 
+        modelMatrix
+            .identity()
+            .translate(-3f, 0f, 0f)
+            .rotateZ(Math.toRadians(-45.0).toFloat())
+//            .scale(2f)
+
+        viewMatrix.lookAt(Vector3f(0f, 0f, 5f), Vector3f(0f, 0f, 0f), Vector3f(0f, 1f, 0f))
+        projectionMatrix.perspective(Math.toRadians(90.0).toFloat(), getWidth().toFloat() / getHeight(), 0.1f, 10f)
 
 
         GL11.glClearColor(0.2f, 0.3f, 0.3f, 1.0f)
@@ -75,11 +85,29 @@ class BasicGame: GLFWApplicationListener() {
 
         using(shader) {
             val greenValue = Math.sin(glfwGetTime() / 2) + 0.5
-            GL20.glUniform4f(ourColor, 0.0f, greenValue.toFloat(), 0.0f, 1.0f)
+            GL20.glUniform4f(it.ourColor, 0.0f, greenValue.toFloat(), 0.0f, 1.0f)
+//
+//            modelMatrix
+//                .rotate(Math.toRadians(Math.sin(glfwGetTime())).toFloat(), Vector3f(1f, 0f, 1f))
+//                .translate(0f, Math.sin(glfwGetTime() * 0.1f).toFloat(), 0f)
 
-            GL30.glBindVertexArray(vao)
-            GL11.glDrawElements(GL11.GL_TRIANGLES, 6, GL11.GL_UNSIGNED_INT, 0)
-            GL30.glBindVertexArray(0)
+
+            stackPush {
+                val buffer = mallocFloat(16)
+
+                modelMatrix.get(buffer)
+                GL20.glUniformMatrix4fv(it.modelMatrix, false, buffer)
+
+                viewMatrix.get(buffer)
+                GL20.glUniformMatrix4fv(it.viewMatrix, false, buffer)
+
+                projectionMatrix.get(buffer)
+                GL20.glUniformMatrix4fv(it.projectionMatrix, false, buffer)
+
+                GL30.glBindVertexArray(vao)
+                GL11.glDrawElements(GL11.GL_TRIANGLES, 6, GL11.GL_UNSIGNED_INT, 0)
+                GL30.glBindVertexArray(0)
+            }
         }
 
     }
@@ -89,6 +117,7 @@ class BasicGame: GLFWApplicationListener() {
     }
 
     override fun resize(width: Int, height: Int) {
+        projectionMatrix.perspective(Math.toRadians(90.0).toFloat(), width.toFloat() / height, 0.1f, 10f)
         GL11.glViewport(0, 0, width, height)
     }
 

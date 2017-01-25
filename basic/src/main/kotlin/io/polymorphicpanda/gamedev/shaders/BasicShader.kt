@@ -9,7 +9,10 @@ import org.pandaframework.shader.uniform
  * @author Ranie Jade Ramiso
  */
 class BasicShader: Shader(LWJGLShaderBackend()) {
-    override val version = ShaderVersion("330", ShaderVersion.Profile.Core)
-
     val ourColor by uniform()
+    val modelMatrix by uniform()
+    val viewMatrix by uniform()
+    val projectionMatrix by uniform()
+
+    override val version = ShaderVersion("330", ShaderVersion.Profile.Core)
 }

@@ -15,6 +15,10 @@ abstract class Application<T: ApplicationPeer, K: ApplicationListener<T>> {
 
     private val peer: T by lazy {
         wrapPeer(object: ApplicationPeer {
+            override fun getWidth() = this@Application.getWidth()
+
+            override fun getHeight() = this@Application.getHeight()
+
             override fun requestShutdown() {
                 this@Application.requestShutdown()
             }
@@ -85,6 +89,8 @@ abstract class Application<T: ApplicationPeer, K: ApplicationListener<T>> {
     protected abstract fun flush()
     protected abstract fun time(): Double
     protected abstract fun requestShutdown()
+    protected abstract fun getWidth(): Int
+    protected abstract fun getHeight(): Int
 
     protected abstract fun wrapPeer(base: ApplicationPeer): T
 

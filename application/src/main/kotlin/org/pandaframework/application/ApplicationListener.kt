@@ -24,5 +24,8 @@ abstract class ApplicationListener<T: ApplicationPeer> {
         peer.requestShutdown()
     }
 
+    fun getWidth() = peer.getWidth()
+    fun getHeight() = peer.getHeight()
+
     protected fun getPeer() = peer
 }

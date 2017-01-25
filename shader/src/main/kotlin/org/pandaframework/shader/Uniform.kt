@@ -1,20 +1,19 @@
 package org.pandaframework.shader
 
-import org.pandaframework.shader.backend.ShaderBackend
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
-fun Shader.uniform() = Uniform(this.backend)
+fun Shader.uniform() = Uniform(this)
 
 /**
  * @author Ranie Jade Ramiso
  */
-class Uniform(val backend: ShaderBackend): ReadOnlyProperty<Shader, Int> {
+class Uniform(val shader: Shader): ReadOnlyProperty<Any, Int> {
     private var location: Int? = null
 
-    override fun getValue(thisRef: Shader, property: KProperty<*>): Int {
+    override fun getValue(thisRef: Any, property: KProperty<*>): Int {
         if (location == null) {
-            location = backend.getUniformLocation(thisRef.program, property.name)
+            location = shader.backend.getUniformLocation(shader.program, property.name)
         }
 
         return location!!

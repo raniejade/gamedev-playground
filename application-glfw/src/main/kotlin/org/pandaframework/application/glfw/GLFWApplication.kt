@@ -14,6 +14,9 @@ import kotlin.properties.Delegates
 class GLFWApplication(val backend: Backend): Application<GLFWApplicationPeer, GLFWApplicationListener>() {
     var fullscreen = false
 
+    private var _width: Int by Delegates.notNull()
+    private var _height: Int by Delegates.notNull()
+
     private var window: Long by Delegates.notNull()
 
     private val monitor: Long by lazy {
@@ -34,6 +37,9 @@ class GLFWApplication(val backend: Backend): Application<GLFWApplicationPeer, GL
         }
 
     private val resizeCallback = GLFWWindowSizeCallback.create { window, width, height ->
+        _width = width
+        _height = height
+
         onResize(width, height)
     }
 
@@ -63,8 +69,11 @@ class GLFWApplication(val backend: Backend): Application<GLFWApplicationPeer, GL
             NULL
         }
 
+        _width = videoMode.width()
+        _height = videoMode.height()
 
-        window = glfwCreateWindow(videoMode.width(), videoMode.height(), title, monitor, NULL)
+
+        window = glfwCreateWindow(_width, _height, title, monitor, NULL)
 
         if (window == NULL) {
             throw GLFWApplicationException("Failed to create a window.")
@@ -88,6 +97,10 @@ class GLFWApplication(val backend: Backend): Application<GLFWApplicationPeer, GL
         mouseClickCallback.free()
         glfwTerminate()
     }
+
+    override fun getWidth() = _width
+
+    override fun getHeight() = _height
 
     override fun shouldTerminate() = glfwWindowShouldClose(window)
 
