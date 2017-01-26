@@ -27,6 +27,8 @@ class BasicGame: GLFWApplicationListener() {
     private val viewMatrix = Matrix4f()
     private val projectionMatrix = Matrix4f()
 
+    private var rotation = 0f
+
     private val matrixBuffer = MemoryUtil.memAllocFloat(16)
 
     override fun setup() {
@@ -73,7 +75,7 @@ class BasicGame: GLFWApplicationListener() {
             GL30.glBindVertexArray(0)
         }
 
-        viewMatrix.lookAt(Vector3f(0f, 0f, 2f), Vector3f(0f, 0f, 0f), Vector3f(0f, 1f, 0f))
+        viewMatrix.lookAt(Vector3f(0f, 0f, 5f), Vector3f(0f, 0f, 0f), Vector3f(0f, 1f, 0f))
         projectionMatrix.perspective(Math.toRadians(45.0).toFloat(), getWidth().toFloat() / getHeight(), 0.1f, 100f)
 
 
@@ -84,13 +86,14 @@ class BasicGame: GLFWApplicationListener() {
     override fun update(time: Double) {
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT)
 
+        rotation += Math.toRadians(Math.sin(glfwGetTime())).toFloat()
+
         using(shader) {
             val greenValue = Math.sin(glfwGetTime() / 2) + 0.5
             GL20.glUniform4f(it.ourColor, 0.0f, greenValue.toFloat(), 0.0f, 1.0f)
 
-            modelMatrix
-                .rotate(Math.toRadians(Math.sin(glfwGetTime())).toFloat(), Vector3f(0f, 1f, 1f))
-
+            modelMatrix.identity()
+                .rotate(rotation, Vector3f(0f, 1f, 1f))
 
             modelMatrix.get(matrixBuffer)
             GL20.glUniformMatrix4fv(it.modelMatrix, false, matrixBuffer)
