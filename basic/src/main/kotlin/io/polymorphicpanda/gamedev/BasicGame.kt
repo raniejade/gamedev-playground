@@ -5,11 +5,7 @@ import org.joml.Math
 import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.lwjgl.glfw.GLFW.*
-import org.lwjgl.opengl.GL
-import org.lwjgl.opengl.GL11
-import org.lwjgl.opengl.GL15
-import org.lwjgl.opengl.GL20
-import org.lwjgl.opengl.GL30
+import org.lwjgl.opengl.*
 import org.lwjgl.system.MemoryUtil
 import org.pandaframework.application.glfw.GLFWApplication
 import org.pandaframework.application.glfw.GLFWApplicationListener
@@ -26,8 +22,6 @@ class BasicGame: GLFWApplicationListener() {
     private val modelMatrix = Matrix4f()
     private val viewMatrix = Matrix4f()
     private val projectionMatrix = Matrix4f()
-    private val cameraPosition = Vector3f(0.0f, 0.0f, 3.0f)
-    private val cameraVelocity = Vector3f(0.0f, 0.0f, 0.0f)
     private val cameraTarget = Vector3f(0.0f, 0.0f, 0.0f)
     private val cameraUp = Vector3f(0.0f, 1.0f, 0.0f)
 
@@ -83,7 +77,7 @@ class BasicGame: GLFWApplicationListener() {
 
 
         GL11.glClearColor(0.2f, 0.3f, 0.3f, 1.0f)
-//        GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE)
+        GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE)
     }
 
     override fun update(time: Double) {
@@ -91,23 +85,18 @@ class BasicGame: GLFWApplicationListener() {
 
         rotation += Math.toRadians(Math.sin(glfwGetTime())).toFloat()
 
-        cameraPosition.x += (cameraVelocity.x * time).toFloat()
-        cameraPosition.y += (cameraVelocity.y * time).toFloat()
-        cameraPosition.z += (cameraVelocity.z * time).toFloat()
-
-        cameraTarget.x = cameraPosition.x
-        cameraTarget.y = cameraPosition.y
-        cameraTarget.z = cameraPosition.z - 3f
-
         using(shader) {
-            val greenValue = Math.sin(glfwGetTime() / 2) + 0.5
+            val greenValue = Math.sin(glfwGetTime() / 2) + 0.5f
             GL20.glUniform4f(it.ourColor, 0.0f, greenValue.toFloat(), 0.0f, 1.0f)
+
+            val x = Math.sin(glfwGetTime()) * 10.0f
+            val z = Math.sin(glfwGetTime()) * 10.0f
 
             modelMatrix.identity()
                 .rotate(rotation, Vector3f(0f, 1f, 1f))
 
             viewMatrix.identity()
-                .lookAt(cameraPosition, cameraTarget, cameraUp)
+                .lookAt(Vector3f(x.toFloat(), 0f, 10f), cameraTarget, cameraUp)
 
             modelMatrix.get(matrixBuffer)
             GL20.glUniformMatrix4fv(it.modelMatrix, false, matrixBuffer)
@@ -145,16 +134,6 @@ class BasicGame: GLFWApplicationListener() {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN)
         } else if (key == GLFW_KEY_3 && action == GLFW_PRESS) {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED)
-        }
-
-        if (key == GLFW_KEY_W) {
-            cameraVelocity.z  = -1.0f
-        } else if (key == GLFW_KEY_A) {
-            cameraVelocity.x = - 1.0f
-        } else if (key == GLFW_KEY_D) {
-            cameraVelocity.x = 1.0f
-        } else if (key == GLFW_KEY_S) {
-            cameraVelocity.z  = 1.0f
         }
     }
 }
