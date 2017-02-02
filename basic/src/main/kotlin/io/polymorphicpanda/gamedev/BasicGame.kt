@@ -33,14 +33,34 @@ class BasicGame: GLFWApplicationListener() {
         GL.createCapabilities(false)
 
         val vertices = floatArrayOf(
+            // front
             0.5f,  0.5f, 0.0f,  // Top Right
             0.5f, -0.5f, 0.0f,  // Bottom Right
             -0.5f, -0.5f, 0.0f,  // Bottom Left
-            -0.5f,  0.5f, 0.0f   // Top Left
+            -0.5f,  0.5f, 0.0f,   // Top Left
+
+            // back
+            0.5f,  0.5f, -1.0f,  // Top Right
+            0.5f, -0.5f, -1.0f,  // Bottom Right
+            -0.5f, -0.5f, -1.0f,  // Bottom Left
+            -0.5f,  0.5f, -1.0f   // Top Left
         )
         val indices = intArrayOf(
+            // front
             0, 1, 3,  // First Triangle
-            1, 2, 3   // Second Triangle
+            1, 2, 3,   // Second Triangle
+
+            // right
+            0, 4, 5,
+            0, 5, 1,
+
+            // left
+            3, 7, 6,
+            3, 6, 2,
+
+            // back
+            4, 7, 6,
+            6, 5, 4
         )
 
         vao = GL30.glGenVertexArrays()
@@ -77,26 +97,26 @@ class BasicGame: GLFWApplicationListener() {
 
 
         GL11.glClearColor(0.2f, 0.3f, 0.3f, 1.0f)
-        GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE)
+//        GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE)
     }
 
     override fun update(time: Double) {
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT)
 
-        rotation += Math.toRadians(Math.sin(glfwGetTime())).toFloat()
+//        rotation += Math.toRadians(Math.sin(glfwGetTime())).toFloat()
 
         using(shader) {
             val greenValue = Math.sin(glfwGetTime() / 2) + 0.5f
             GL20.glUniform4f(it.ourColor, 0.0f, greenValue.toFloat(), 0.0f, 1.0f)
 
             val x = Math.sin(glfwGetTime()) * 10.0f
-            val z = Math.sin(glfwGetTime()) * 10.0f
+            val z = Math.sin(glfwGetTime()) * 5.0f
 
-            modelMatrix.identity()
-                .rotate(rotation, Vector3f(0f, 1f, 1f))
+//            modelMatrix.identity()
+//                .rotate(rotation, Vector3f(0f, 1f, 1f))
 
             viewMatrix.identity()
-                .lookAt(Vector3f(x.toFloat(), 0f, 10f), cameraTarget, cameraUp)
+                .lookAt(Vector3f(x.toFloat(), 0f, 5f), cameraTarget, cameraUp)
 
             modelMatrix.get(matrixBuffer)
             GL20.glUniformMatrix4fv(it.modelMatrix, false, matrixBuffer)
@@ -108,7 +128,7 @@ class BasicGame: GLFWApplicationListener() {
             GL20.glUniformMatrix4fv(it.projectionMatrix, false, matrixBuffer)
 
             GL30.glBindVertexArray(vao)
-            GL11.glDrawElements(GL11.GL_TRIANGLES, 6, GL11.GL_UNSIGNED_INT, 0)
+            GL11.glDrawElements(GL11.GL_TRIANGLES, 24, GL11.GL_UNSIGNED_INT, 0)
             GL30.glBindVertexArray(0)
         }
     }
