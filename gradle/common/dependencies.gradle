@@ -11,6 +11,7 @@ dependencyManagement {
             entry 'lwjgl'
             entry 'lwjgl-glfw'
             entry 'lwjgl-opengl'
+            entry 'lwjgl-stb'
         }
 
         dependency 'org.joml:joml:1.9.1'

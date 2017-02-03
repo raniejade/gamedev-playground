@@ -17,11 +17,13 @@ dependencies {
     compile project(':shader-backend-lwjgl')
 
     compile 'org.lwjgl:lwjgl'
+    compile 'org.lwjgl:lwjgl-stb'
     compile 'org.lwjgl:lwjgl-opengl'
 
     compile 'org.joml:joml'
 
     runtime group: 'org.lwjgl', name: 'lwjgl', classifier: "natives-${project.ext.os}"
+    runtime group: 'org.lwjgl', name: 'lwjgl-stb', classifier: "natives-${project.ext.os}"
     runtime group: 'org.lwjgl', name: 'lwjgl-opengl', classifier: "natives-${project.ext.os}"
     runtime group: 'org.lwjgl', name: 'lwjgl-glfw', classifier: "natives-${project.ext.os}"
 }
