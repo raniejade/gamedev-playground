@@ -11,6 +11,7 @@ import org.pandaframework.application.glfw.GLFWApplication
 import org.pandaframework.application.glfw.GLFWApplicationListener
 import org.pandaframework.application.glfw.backend.Backend
 import org.pandaframework.application.glfw.backend.opengl.OpenGLBackend
+import org.pandaframework.lwjgl.BYTES
 import org.pandaframework.lwjgl.stackPush
 import org.pandaframework.shader.using
 import kotlin.properties.Delegates
@@ -93,7 +94,7 @@ class BasicGame: GLFWApplicationListener() {
                 GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, it, GL15.GL_STATIC_DRAW)
             }
 
-            GL20.glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 3 * 4, 0)
+            GL20.glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 3 * Float.BYTES, 0)
             GL20.glEnableVertexAttribArray(0)
 
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0)
@@ -106,7 +107,7 @@ class BasicGame: GLFWApplicationListener() {
         GL11.glEnable(GL11.GL_DEPTH_TEST)
 
         GL11.glClearColor(0.2f, 0.3f, 0.3f, 1.0f)
-//        GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE)
+        GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE)
     }
 
     override fun update(time: Double) {
