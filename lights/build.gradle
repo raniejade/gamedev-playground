@@ -2,7 +2,7 @@ apply from: "$rootDir/gradle/common/kotlin.gradle"
 
 apply plugin: 'application'
 
-mainClassName = 'io.polymorphicpanda.gamedev.BasicGameKt'
+mainClassName = 'io.polymorphicpanda.gamedev.LightsDemoKt'
 
 if (ext.os == "macos") {
     applicationDefaultJvmArgs = ['-XstartOnFirstThread']
