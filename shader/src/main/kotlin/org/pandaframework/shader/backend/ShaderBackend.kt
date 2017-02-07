@@ -12,4 +12,6 @@ interface ShaderBackend {
     fun deleteProgram(program: Int)
     fun useProgram(program: Int)
     fun getUniformLocation(program: Int, name: String): Int
+    fun getUniformBlockIndex(program: Int, name: String): Int
+    fun setUniformBlockBinding(program: Int, index: Int, binding: Int)
 }

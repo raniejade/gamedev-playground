@@ -97,8 +97,6 @@ class BasicGame: GLFWApplicationListener() {
             GL20.glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 3 * Float.BYTES, 0)
             GL20.glEnableVertexAttribArray(0)
 
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0)
-
             GL30.glBindVertexArray(0)
         }
 
@@ -113,31 +111,33 @@ class BasicGame: GLFWApplicationListener() {
     override fun update(time: Double) {
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT or GL11.GL_DEPTH_BUFFER_BIT)
 
-        rotation += Math.toRadians(Math.sin(glfwGetTime())).toFloat()
+        val time = glfwGetTime()
+        rotation += Math.toRadians(Math.sin(time)).toFloat()
 
         using(shader) {
-            val greenValue = Math.sin(glfwGetTime() / 2) + 0.5f
-            val redValue = Math.cos(glfwGetTime() / 2) + 0.5f
-            GL20.glUniform4f(it.ourColor, redValue.toFloat(), greenValue.toFloat(), 0.0f, 1.0f)
+            val greenValue = Math.sin(time / 2) + 0.5f
+            val redValue = Math.cos(time / 2) + 0.5f
+            GL20.glUniform4f(shader.ourColor, redValue.toFloat(), greenValue.toFloat(), 0.0f, 1.0f)
 
             val radius = 10.0f
-            val x = Math.sin(glfwGetTime()) * radius
-            val z = Math.cos(glfwGetTime()) * radius
+            val x = Math.sin(time) * radius
+            val z = Math.cos(time) * radius
 
             modelMatrix.identity()
                 .rotate(Math.toRadians(30.0).toFloat(), Vector3f(1.0f, 0.0f, 0.0f))
 
             viewMatrix.identity()
                 .lookAt(Vector3f(x.toFloat(), 0f, z.toFloat()), cameraTarget, cameraUp)
+//                .lookAt(Vector3f(0f, 0f, 3f), cameraTarget, cameraUp)
 
             modelMatrix.get(matrixBuffer)
-            GL20.glUniformMatrix4fv(it.modelMatrix, false, matrixBuffer)
+            GL20.glUniformMatrix4fv(shader.modelMatrix, false, matrixBuffer)
 
             viewMatrix.get(matrixBuffer)
-            GL20.glUniformMatrix4fv(it.viewMatrix, false, matrixBuffer)
+            GL20.glUniformMatrix4fv(shader.viewMatrix, false, matrixBuffer)
 
             projectionMatrix.get(matrixBuffer)
-            GL20.glUniformMatrix4fv(it.projectionMatrix, false, matrixBuffer)
+            GL20.glUniformMatrix4fv(shader.projectionMatrix, false, matrixBuffer)
 
             GL30.glBindVertexArray(vao)
             GL11.glDrawElements(GL11.GL_TRIANGLES, 36, GL11.GL_UNSIGNED_INT, 0)

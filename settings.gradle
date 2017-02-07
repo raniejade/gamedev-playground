@@ -11,3 +11,4 @@ include 'application'
 include 'application-glfw'
 
 include 'basic'
+include 'lights'
