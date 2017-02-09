@@ -17,6 +17,9 @@ class GLFWApplication(val backend: Backend): Application<GLFWApplicationPeer, GL
     private var _width: Int by Delegates.notNull()
     private var _height: Int by Delegates.notNull()
 
+    private var _framebufferWidth: Int by Delegates.notNull()
+    private var _framebufferHeight: Int by Delegates.notNull()
+
     private var window: Long by Delegates.notNull()
 
     private val monitor: Long by lazy {
@@ -41,6 +44,15 @@ class GLFWApplication(val backend: Backend): Application<GLFWApplicationPeer, GL
         _height = height
 
         onResize(width, height)
+    }
+
+    private val framebufferResizeCallback = GLFWFramebufferSizeCallback.create { window, width, height ->
+        _framebufferWidth = width
+        _framebufferHeight = height
+
+        notifyListeners {
+            it.frameBufferResize(_framebufferWidth, _framebufferHeight)
+        }
     }
 
     private val cursorPositionCallback = GLFWCursorPosCallback.create { window, x, y ->

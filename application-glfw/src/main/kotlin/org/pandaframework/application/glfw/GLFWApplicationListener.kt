@@ -11,4 +11,6 @@ abstract class GLFWApplicationListener: ApplicationListener<GLFWApplicationPeer>
     open fun onKeyType(key: Int, scanCode: Int, action: Int, mods: Int) { }
     open fun onMouseMove(x: Double, y: Double) { }
     open fun onMouseClick(button: Int, action: Int, mods: Int) { }
+
+    open fun frameBufferResize(width: Int, height: Int) { }
 }

@@ -76,9 +76,12 @@ class LightsDemo: GLFWApplicationListener() {
     }
 
     override fun resize(width: Int, height: Int) {
-        GL11.glViewport(0, 0, width, height)
         adjustProjection(width, height)
         uploadProjectionMatrix()
+    }
+
+    override fun frameBufferResize(width: Int, height: Int) {
+        GL11.glViewport(0, 0, width, height)
     }
 
     override fun update(time: Double) {

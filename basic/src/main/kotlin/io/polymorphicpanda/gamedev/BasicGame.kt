@@ -100,7 +100,7 @@ class BasicGame: GLFWApplicationListener() {
             GL30.glBindVertexArray(0)
         }
 
-        projectionMatrix.perspective(Math.toRadians(45.0).toFloat(), getWidth().toFloat() / getHeight(), 0.1f, 1000.0f)
+        resize(getWidth(), getHeight())
 
         GL11.glEnable(GL11.GL_DEPTH_TEST)
 
@@ -152,8 +152,10 @@ class BasicGame: GLFWApplicationListener() {
 
     override fun resize(width: Int, height: Int) {
         projectionMatrix.identity()
-            .perspective(Math.toRadians(90.0).toFloat(), width.toFloat() / height, 0.1f, 100f)
+            .perspective(Math.toRadians(90.0).toFloat(), width.toFloat() / height, 0.1f, 1000f)
+    }
 
+    override fun frameBufferResize(width: Int, height: Int) {
         GL11.glViewport(0, 0, width, height)
     }
 
