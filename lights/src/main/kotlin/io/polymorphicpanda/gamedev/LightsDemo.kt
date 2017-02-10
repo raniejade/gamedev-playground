@@ -4,14 +4,9 @@ import io.polymorphicpanda.gamedev.shader.PhongShader
 import org.joml.Math
 import org.joml.Matrix4f
 import org.joml.Vector3f
-import org.lwjgl.glfw.GLFW
-import org.lwjgl.glfw.GLFW.*
-import org.lwjgl.opengl.GL
-import org.lwjgl.opengl.GL11
-import org.lwjgl.opengl.GL15
-import org.lwjgl.opengl.GL20
-import org.lwjgl.opengl.GL30
-import org.lwjgl.opengl.GL31
+import org.lwjgl.glfw.GLFW.GLFW_OPENGL_CORE_PROFILE
+import org.lwjgl.glfw.GLFW.glfwGetTime
+import org.lwjgl.opengl.*
 import org.lwjgl.system.MemoryUtil
 import org.pandaframework.application.glfw.GLFWApplication
 import org.pandaframework.application.glfw.GLFWApplicationListener
@@ -52,6 +47,8 @@ class LightsDemo: GLFWApplicationListener() {
         GL15.glGenBuffers()
     }
 
+    private val cameraPosition = Vector3f()
+
     private val viewMatrix = Matrix4f()
     private val projectionMatrix = Matrix4f()
 
@@ -87,12 +84,13 @@ class LightsDemo: GLFWApplicationListener() {
     override fun update(time: Double) {
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT or GL11.GL_DEPTH_BUFFER_BIT)
 
-        uploadViewMatrix()
+        updateAndUploadView(time)
 
         using(shader) {
             cubes.forEach { (position) ->
-                val x = Math.sin(glfwGetTime() + position.z) * RADIUS
-                val y = Math.cos(glfwGetTime() + position.z) * RADIUS
+                val step = time * 0.2f
+                val x = Math.sin(step + position.z) * RADIUS
+                val y = Math.cos(step + position.z) * RADIUS
                 val newPosition = Vector3f( x.toFloat(),  y.toFloat(), position.z)
 
                 modelMatrix.translation(newPosition)
@@ -101,7 +99,7 @@ class LightsDemo: GLFWApplicationListener() {
                 GL20.glUniformMatrix4fv(shader.model, false, matrixBuffer)
 
                 GL30.glBindVertexArray(vao)
-                GL11.glDrawElements(GL11.GL_TRIANGLES, 36, GL11.GL_UNSIGNED_INT, 0)
+                GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, 36)
                 GL30.glBindVertexArray(0)
             }
 
@@ -133,12 +131,14 @@ class LightsDemo: GLFWApplicationListener() {
         GL15.glBindBuffer(GL31.GL_UNIFORM_BUFFER, 0)
     }
 
-    private fun uploadViewMatrix() {
-        val x = Math.sin(glfwGetTime()) * 100
-        val z = Math.cos(glfwGetTime()) * 100
+    private fun updateAndUploadView(time: Double) {
+        val radius = 20.0f
+        // fix me
+        cameraPosition.x = Math.sin(time).toFloat() * radius
+        cameraPosition.z = Math.cos(1000 / time).toFloat() * radius
 
         viewMatrix.identity()
-            .lookAt(Vector3f(x.toFloat(), 0.0f, z.toFloat()), Vector3f(0.0f, 0.0f, 0.0f), Vector3f(0.0f, 1.0f, 0.0f))
+            .lookAt(cameraPosition, Vector3f(0.0f, 0.0f, 0.0f), Vector3f(0.0f, 1.0f, 0.0f))
             .get(matrixBuffer)
 
         GL15.glBindBuffer(GL31.GL_UNIFORM_BUFFER, matricesUbo)
@@ -148,47 +148,51 @@ class LightsDemo: GLFWApplicationListener() {
 
     private fun setupCubeVao(): Int {
         val vertices = floatArrayOf(
-            // front
-            0.5f,  0.5f, 0.0f,  // Top Right
-            0.5f, -0.5f, 0.0f,  // Bottom Right
-            -0.5f, -0.5f, 0.0f,  // Bottom Left
-            -0.5f,  0.5f, 0.0f,   // Top Left
+            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+            0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+            0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+            0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 
-            // back
-            0.5f,  0.5f, -1.0f,  // Top Right
-            0.5f, -0.5f, -1.0f,  // Bottom Right
-            -0.5f, -0.5f, -1.0f,  // Bottom Left
-            -0.5f,  0.5f, -1.0f   // Top Left
-        )
-        val indices = intArrayOf(
-            // front
-            0, 1, 3,  // First Triangle
-            1, 2, 3,   // Second Triangle
+            -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+            0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+            0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+            0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
 
-            // right
-            0, 4, 5,
-            0, 5, 1,
+            -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
 
-            // left
-            3, 7, 6,
-            3, 6, 2,
+            0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+            0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+            0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+            0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+            0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+            0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
 
-            // back
-            4, 7, 6,
-            6, 5, 4,
+            -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+            0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+            0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+            0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
 
-            // top
-            0, 4, 7,
-            3, 7, 0,
-
-            // bottom
-            1, 5, 6,
-            2, 6, 1
+            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+            0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+            0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+            0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
         )
 
         val vao = GL30.glGenVertexArrays()
         val vbo = GL15.glGenBuffers()
-        val ebo = GL15.glGenBuffers()
 
 
         stackPush {
@@ -201,15 +205,11 @@ class LightsDemo: GLFWApplicationListener() {
                 GL15.glBufferData(GL15.GL_ARRAY_BUFFER, it, GL15.GL_STATIC_DRAW)
             }
 
-            GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, ebo)
-            mallocInt(indices.size).let {
-                it.put(indices)
-                it.flip()
-                GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, it, GL15.GL_STATIC_DRAW)
-            }
-
-            GL20.glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 3 * Float.BYTES, 0)
+            GL20.glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 6 * Float.BYTES, 0L)
             GL20.glEnableVertexAttribArray(0)
+
+            GL20.glVertexAttribPointer(1, 3, GL11.GL_FLOAT, false, 6 * Float.BYTES, 3L * Float.BYTES)
+            GL20.glEnableVertexAttribArray(1)
 
             GL30.glBindVertexArray(0)
         }
