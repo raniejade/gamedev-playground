@@ -5,8 +5,12 @@ import org.joml.Math
 import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.lwjgl.glfw.GLFW.GLFW_OPENGL_CORE_PROFILE
-import org.lwjgl.glfw.GLFW.glfwGetTime
-import org.lwjgl.opengl.*
+import org.lwjgl.opengl.GL
+import org.lwjgl.opengl.GL11
+import org.lwjgl.opengl.GL15
+import org.lwjgl.opengl.GL20
+import org.lwjgl.opengl.GL30
+import org.lwjgl.opengl.GL31
 import org.lwjgl.system.MemoryUtil
 import org.pandaframework.application.glfw.GLFWApplication
 import org.pandaframework.application.glfw.GLFWApplicationListener
@@ -29,6 +33,9 @@ data class Cube(val position: Vector3f)
 class LightsDemo: GLFWApplicationListener() {
     private val shader = PhongShader()
     private var vao: Int by Delegates.notNull()
+
+    private var angle = 0.0
+    private var step = 0.0
 
 //    private val cubes = listOf(
 //        Cube(Vector3f(0.0f, 0.0f, 0.0f)),
@@ -88,7 +95,7 @@ class LightsDemo: GLFWApplicationListener() {
 
         using(shader) {
             cubes.forEach { (position) ->
-                val step = time * 0.2f
+                step += time * 0.02f
                 val x = Math.sin(step + position.z) * RADIUS
                 val y = Math.cos(step + position.z) * RADIUS
                 val newPosition = Vector3f( x.toFloat(),  y.toFloat(), position.z)
@@ -132,10 +139,10 @@ class LightsDemo: GLFWApplicationListener() {
     }
 
     private fun updateAndUploadView(time: Double) {
-        val radius = 20.0f
-        // fix me
-        cameraPosition.x = Math.sin(time).toFloat() * radius
-        cameraPosition.z = Math.cos(1000 / time).toFloat() * radius
+        val radius = 50.0
+        angle += 0.2 * time
+        cameraPosition.x = (radius * Math.sin(angle) * Math.cos(Math.PI)).toFloat()
+        cameraPosition.z = (radius * Math.cos(angle)).toFloat()
 
         viewMatrix.identity()
             .lookAt(cameraPosition, Vector3f(0.0f, 0.0f, 0.0f), Vector3f(0.0f, 1.0f, 0.0f))
