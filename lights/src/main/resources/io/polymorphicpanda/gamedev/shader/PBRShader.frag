@@ -6,15 +6,15 @@ out vec4 fragColor;
 const float PI = 3.14159265359;
 
 // material properties
-uniform vec3 albedo = vec3(0.5f, 0.0f, 0.0f);
-uniform float metallic = 0.6f;
-uniform float roughness = 0.2f;
+uniform vec3 albedo = vec3(0.026f, 0.246f, 0.026f);
+uniform float metallic = 0.0f;
+uniform float roughness = 0.3f;
 uniform float ambientOcclusion = 1.0f;
 
 uniform vec3 cameraPosition;
 
-uniform vec3 lightPosition = vec3(0.0f, 1.0f, 2.0f);
-uniform vec3 lightColor = vec3(1.0f, 0.8f, 0.6f);
+uniform vec3 lightPosition = vec3(0.0f, 2.0f, 2.0f);
+uniform vec3 lightColor = vec3(1.0f);
 
 float DistributionGGX(vec3 N, vec3 H, float roughness) {
     float a      = roughness*roughness;
@@ -54,8 +54,11 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness) {
 
 vec3 reflectanceEquation(vec3 N, vec3 V, vec3 F, vec3 kS, vec3 kD, vec3 lightPosition, vec3 lightColor,
                          vec3 fragPosition, float roughness) {
+     // light direction
     vec3 L = normalize(lightPosition - fragPosition);
+    // view direction
     vec3 H = normalize(V + L);
+    // distance between current fragment and light
     float distance    = length(lightPosition - fragPosition);
     float attenuation = 1.0 / (distance * distance);
     vec3 radiance     = lightColor * attenuation;
@@ -70,9 +73,8 @@ vec3 reflectanceEquation(vec3 N, vec3 V, vec3 F, vec3 kS, vec3 kD, vec3 lightPos
 
     // add to outgoing radiance Lo
     float NdotL = max(dot(N, L), 0.0);
-    vec3 Lo = (kD * albedo / PI + brdf) * radiance * NdotL;
 
-    return Lo;
+    return (kD * albedo / PI + brdf) * radiance * NdotL;
 }
 
 void main() {
@@ -88,8 +90,8 @@ void main() {
     kD *= 1.0 - metallic;
 
     vec3 Lo = reflectanceEquation(N, V, F, kS, kD, lightPosition, lightColor, fragPosition, roughness);
-    Lo += reflectanceEquation(N, V, F, kS, kD,  vec3(0.0f, 1.0f, -1.0f), lightColor, fragPosition, roughness);
-    Lo += reflectanceEquation(N, V, F, kS, kD,  vec3(0.0f, 1.0f, 0.0f), lightColor, fragPosition, roughness);
+    Lo += reflectanceEquation(N, V, F, kS, kD,  vec3(0.0f, 2.0f, -1.0f), lightColor, fragPosition, roughness);
+    Lo += reflectanceEquation(N, V, F, kS, kD,  vec3(0.0f, 2.0f, 0.0f), lightColor, fragPosition, roughness);
 
     vec3 ambient = vec3(0.03) * albedo * ambientOcclusion;
     vec3 color = ambient + Lo;
