@@ -9,9 +9,10 @@ import org.pandaframework.shader.uniformBlock
 /**
  * @author Ranie Jade Ramiso
  */
-class PhongShader: Shader(LWJGLShaderBackend()) {
+class PBRShader: Shader(LWJGLShaderBackend()) {
     val model by uniform()
-    val matrices by uniformBlock(0)
+    val cameraPosition by uniform()
+    val constants by uniformBlock(0)
 
     override val version: ShaderVersion
         get() = ShaderVersion("330", ShaderVersion.Profile.Core)

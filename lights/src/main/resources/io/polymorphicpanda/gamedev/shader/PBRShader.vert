@@ -4,7 +4,7 @@ layout (location = 1) in vec3 normal;
 out vec3 fragNormal;
 out vec3 fragPosition;
 
-layout (std140) uniform matrices
+layout (std140) uniform constants
 {
     mat4 projection;
     mat4 view;

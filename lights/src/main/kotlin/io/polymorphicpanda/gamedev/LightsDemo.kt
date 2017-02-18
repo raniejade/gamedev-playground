@@ -1,8 +1,9 @@
 package io.polymorphicpanda.gamedev
 
-import io.polymorphicpanda.gamedev.shader.PhongShader
+import io.polymorphicpanda.gamedev.shader.PBRShader
 import org.joml.Math
 import org.joml.Matrix4f
+import org.joml.Quaternionf
 import org.joml.Vector3f
 import org.lwjgl.glfw.GLFW.GLFW_OPENGL_CORE_PROFILE
 import org.lwjgl.opengl.GL
@@ -23,7 +24,7 @@ import kotlin.properties.Delegates
 
 val MATRIX_SIZE = 16L * Float.BYTES
 
-val RADIUS = 10.0f
+val RADIUS = 1.0f
 
 data class Cube(val position: Vector3f)
 
@@ -31,7 +32,7 @@ data class Cube(val position: Vector3f)
  * @author Ranie Jade Ramiso
  */
 class LightsDemo: GLFWApplicationListener() {
-    private val shader = PhongShader()
+    private val shader = PBRShader()
     private var vao: Int by Delegates.notNull()
 
     private var angle = 0.0
@@ -43,21 +44,27 @@ class LightsDemo: GLFWApplicationListener() {
 //        Cube(Vector3f(0.0f, -2.0f, 0.0f))
 //    )
 
-    private val cubes = (0..50).map {
-        val x = Math.sin(it.toDouble()) * RADIUS
-        val y = Math.cos(it.toDouble()) * RADIUS
-
-        Cube(Vector3f(x.toFloat(), y.toFloat(), -it.toFloat()))
-    }
+    private val cubes = listOf(
+        Cube(Vector3f(0.0f, 0.0f, 0.0f))
+    )
+//
+//    private val cubes = (0..50).map {
+//        val x = Math.sin(it.toDouble()) * RADIUS
+//        val y = Math.cos(it.toDouble()) * RADIUS
+//
+//        Cube(Vector3f(x.toFloat(), y.toFloat(), -it.toFloat()))
+//    }
 
     private val matricesUbo by lazy {
         GL15.glGenBuffers()
     }
 
-    private val cameraPosition = Vector3f()
+    private val cameraPosition = Vector3f(0.0f, 2.0f, -3.0f)
 
     private val viewMatrix = Matrix4f()
     private val projectionMatrix = Matrix4f()
+
+    private val rotation = Quaternionf()
 
     // reuse this for every cube
     private val modelMatrix = Matrix4f()
@@ -76,7 +83,7 @@ class LightsDemo: GLFWApplicationListener() {
         uploadProjectionMatrix()
 
         GL11.glEnable(GL11.GL_DEPTH_TEST)
-        GL11.glClearColor(0.2f, 0.3f, 0.3f, 1.0f)
+        GL11.glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
     }
 
     override fun resize(width: Int, height: Int) {
@@ -93,15 +100,22 @@ class LightsDemo: GLFWApplicationListener() {
 
         updateAndUploadView(time)
 
+        rotation.integrate(time.toFloat(), 0.0f, 1.0f, 0.0f)
+
         using(shader) {
             cubes.forEach { (position) ->
-                step += time * 0.02f
-                val x = Math.sin(step + position.z) * RADIUS
-                val y = Math.cos(step + position.z) * RADIUS
-                val newPosition = Vector3f( x.toFloat(),  y.toFloat(), position.z)
+                step += time * 0.5f
+                val x = Math.sin(step + position.x) * RADIUS
+                val z = Math.cos(step + position.z) * RADIUS
+                val newPosition = Vector3f(x.toFloat(),  position.y, z.toFloat())
 
                 modelMatrix.translation(newPosition)
                     .get(matrixBuffer)
+
+                GL20.glUniform3fv(
+                    shader.cameraPosition,
+                    floatArrayOf(cameraPosition.x, cameraPosition.y, cameraPosition.z)
+                )
 
                 GL20.glUniformMatrix4fv(shader.model, false, matrixBuffer)
 
@@ -121,7 +135,7 @@ class LightsDemo: GLFWApplicationListener() {
         val blockSize = MATRIX_SIZE * 2
         GL15.glBindBuffer(GL31.GL_UNIFORM_BUFFER, matricesUbo)
         GL15.glBufferData(GL31.GL_UNIFORM_BUFFER, blockSize, GL15.GL_STATIC_DRAW)
-        GL30.glBindBufferRange(GL31.GL_UNIFORM_BUFFER, shader.matrices, matricesUbo, 0, blockSize)
+        GL30.glBindBufferRange(GL31.GL_UNIFORM_BUFFER, shader.constants, matricesUbo, 0, blockSize)
         GL15.glBindBuffer(GL31.GL_UNIFORM_BUFFER, 0)
     }
 
@@ -139,10 +153,10 @@ class LightsDemo: GLFWApplicationListener() {
     }
 
     private fun updateAndUploadView(time: Double) {
-        val radius = 50.0
-        angle += 0.2 * time
-        cameraPosition.x = (radius * Math.sin(angle) * Math.cos(Math.PI)).toFloat()
-        cameraPosition.z = (radius * Math.cos(angle)).toFloat()
+//        val radius = 2.0
+//        angle += 0.1 * time
+//        cameraPosition.x = (radius * Math.sin(angle) * Math.cos(Math.PI)).toFloat()
+//        cameraPosition.z = (radius * Math.cos(angle)).toFloat()
 
         viewMatrix.identity()
             .lookAt(cameraPosition, Vector3f(0.0f, 0.0f, 0.0f), Vector3f(0.0f, 1.0f, 0.0f))
