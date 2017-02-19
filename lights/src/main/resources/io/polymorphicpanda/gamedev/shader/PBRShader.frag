@@ -19,10 +19,10 @@ layout (std140) uniform constants
 };
 
 // material properties
-uniform vec3 albedo = vec3(0.026f, 0.246f, 0.026f);
-uniform float metallic = 0.0f;
-uniform float roughness = 0.3f;
-uniform float ambientOcclusion = 1.0f;
+uniform vec3 albedo;
+uniform float metallic;
+uniform float roughness;
+uniform float ao;
 
 uniform vec3 lightPosition = vec3(0.0f, 2.0f, 2.0f);
 uniform vec3 lightColor = vec3(1.0f);
@@ -104,7 +104,7 @@ void main() {
     Lo += reflectanceEquation(N, V, F, kS, kD,  vec3(0.0f, 2.0f, -1.0f), lightColor, fragPosition, roughness);
     Lo += reflectanceEquation(N, V, F, kS, kD,  vec3(0.0f, 2.0f, 0.0f), lightColor, fragPosition, roughness);
 
-    vec3 ambient = vec3(0.03) * albedo * ambientOcclusion;
+    vec3 ambient = vec3(0.03) * albedo * ao;
     vec3 color = ambient + Lo;
 
     color = color / (color + vec3(1.0));

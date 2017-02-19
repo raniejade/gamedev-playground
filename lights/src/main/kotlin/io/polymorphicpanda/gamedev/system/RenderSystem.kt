@@ -2,6 +2,7 @@ package io.polymorphicpanda.gamedev.system
 
 import io.polymorphicpanda.gamedev.GameState
 import io.polymorphicpanda.gamedev.component.Cube
+import io.polymorphicpanda.gamedev.component.Material
 import io.polymorphicpanda.gamedev.shader.PBRShader
 import io.polymorphicpanda.gamedev.shader.UniformBufferManager
 import org.joml.Matrix4f
@@ -33,6 +34,7 @@ class RenderSystem(private val uniformBufferManager: UniformBufferManager): Syst
     private val modelMatrix = Matrix4f()
 
     private val cubeMapper: Mapper<Cube> by mapper()
+    private val materialMapper: Mapper<Material> by mapper()
 
     // we reuse this buffer every time we upload
     // matrix data to OpenGL
@@ -48,7 +50,7 @@ class RenderSystem(private val uniformBufferManager: UniformBufferManager): Syst
     }
 
     override fun AspectBuilder.aspect() {
-        allOf(Cube::class)
+        allOf(Cube::class, Material::class)
     }
 
     override fun update(time: Double, entity: Entity) {
@@ -60,11 +62,22 @@ class RenderSystem(private val uniformBufferManager: UniformBufferManager): Syst
                     .get(matrixBuffer)
 
                 GL20.glUniformMatrix4fv(shader.model, false, matrixBuffer)
-
-                GL30.glBindVertexArray(vao)
-                GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, 36)
-                GL30.glBindVertexArray(0)
             }
+
+            with(materialMapper.get(entity)) {
+                matrixBuffer.position(13)
+                albedo.get(matrixBuffer)
+                GL20.glUniform3fv(shader.albedo, matrixBuffer)
+                matrixBuffer.rewind()
+
+                GL20.glUniform1f(shader.metallic, metallic)
+                GL20.glUniform1f(shader.roughness, roughness)
+                GL20.glUniform1f(shader.ao, ao)
+            }
+
+            GL30.glBindVertexArray(vao)
+            GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, 36)
+            GL30.glBindVertexArray(0)
         }
     }
 
