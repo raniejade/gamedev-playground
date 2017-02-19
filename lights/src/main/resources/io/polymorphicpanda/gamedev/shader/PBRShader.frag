@@ -105,8 +105,9 @@ void main() {
     kD *= 1.0 - material.metallic;
 
     vec3 Lo = reflectanceEquation(N, V, F, kS, kD, lightPosition, lightColor, fragPosition, material);
-    Lo += reflectanceEquation(N, V, F, kS, kD,  vec3(0.0f, 2.0f, -1.0f), lightColor, fragPosition, material);
-    Lo += reflectanceEquation(N, V, F, kS, kD,  vec3(0.0f, 2.0f, 0.0f), lightColor, fragPosition, material);
+    Lo += reflectanceEquation(N, V, F, kS, kD,  vec3(0.0f, 1.0f, -1.0f), lightColor, fragPosition, material);
+    Lo += reflectanceEquation(N, V, F, kS, kD,  vec3(0.0f, 1.0f, 0.0f), lightColor, fragPosition, material);
+    Lo += reflectanceEquation(N, V, F, kS, kD,  vec3(0.0f, 0.0f, 0.0f), lightColor, fragPosition, material);
 
     vec3 ambient = vec3(0.03) * material.albedo * material.ao;
     vec3 color = ambient + Lo;
