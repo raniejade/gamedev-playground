@@ -18,11 +18,15 @@ layout (std140) uniform constants
     vec3 cameraPosition;    // 128
 };
 
-// material properties
-uniform vec3 albedo;
-uniform float metallic;
-uniform float roughness;
-uniform float ao;
+struct Material {
+    vec3 albedo;
+    float metallic;
+    float roughness;
+    float ao;
+};
+
+
+uniform Material material;
 
 uniform vec3 lightPosition = vec3(0.0f, 2.0f, 2.0f);
 uniform vec3 lightColor = vec3(1.0f);
@@ -64,7 +68,7 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness) {
 }
 
 vec3 reflectanceEquation(vec3 N, vec3 V, vec3 F, vec3 kS, vec3 kD, vec3 lightPosition, vec3 lightColor,
-                         vec3 fragPosition, float roughness) {
+                         vec3 fragPosition, Material material) {
      // light direction
     vec3 L = normalize(lightPosition - fragPosition);
     // view direction
@@ -75,8 +79,8 @@ vec3 reflectanceEquation(vec3 N, vec3 V, vec3 F, vec3 kS, vec3 kD, vec3 lightPos
     vec3 radiance     = lightColor * attenuation;
 
     // cook-torrance brdf
-    float NDF = DistributionGGX(N, H, roughness);
-    float G   = GeometrySmith(N, V, L, roughness);
+    float NDF = DistributionGGX(N, H, material.roughness);
+    float G   = GeometrySmith(N, V, L, material.roughness);
 
     vec3 nominator    = NDF * G * F;
     float denominator = 4 * max(dot(V, N), 0.0) * max(dot(L, N), 0.0) + 0.001;
@@ -85,7 +89,7 @@ vec3 reflectanceEquation(vec3 N, vec3 V, vec3 F, vec3 kS, vec3 kD, vec3 lightPos
     // add to outgoing radiance Lo
     float NdotL = max(dot(N, L), 0.0);
 
-    return (kD * albedo / PI + brdf) * radiance * NdotL;
+    return (kD * material.albedo / PI + brdf) * radiance * NdotL;
 }
 
 void main() {
@@ -93,18 +97,18 @@ void main() {
     vec3 V = normalize(cameraPosition - fragPosition);
 
     vec3 F0 = vec3(0.04);
-    F0      = mix(F0, albedo, metallic);
-    vec3 F  = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+    F0      = mix(F0, material.albedo, material.metallic);
+    vec3 F  = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, material.roughness);
 
     vec3 kS = F;
     vec3 kD = vec3(1.0) - kS;
-    kD *= 1.0 - metallic;
+    kD *= 1.0 - material.metallic;
 
-    vec3 Lo = reflectanceEquation(N, V, F, kS, kD, lightPosition, lightColor, fragPosition, roughness);
-    Lo += reflectanceEquation(N, V, F, kS, kD,  vec3(0.0f, 2.0f, -1.0f), lightColor, fragPosition, roughness);
-    Lo += reflectanceEquation(N, V, F, kS, kD,  vec3(0.0f, 2.0f, 0.0f), lightColor, fragPosition, roughness);
+    vec3 Lo = reflectanceEquation(N, V, F, kS, kD, lightPosition, lightColor, fragPosition, material);
+    Lo += reflectanceEquation(N, V, F, kS, kD,  vec3(0.0f, 2.0f, -1.0f), lightColor, fragPosition, material);
+    Lo += reflectanceEquation(N, V, F, kS, kD,  vec3(0.0f, 2.0f, 0.0f), lightColor, fragPosition, material);
 
-    vec3 ambient = vec3(0.03) * albedo * ao;
+    vec3 ambient = vec3(0.03) * material.albedo * material.ao;
     vec3 color = ambient + Lo;
 
     color = color / (color + vec3(1.0));

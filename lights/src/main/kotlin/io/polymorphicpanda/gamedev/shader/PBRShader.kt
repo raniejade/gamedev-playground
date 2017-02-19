@@ -12,10 +12,10 @@ import org.pandaframework.shader.uniformBlock
 class PBRShader: Shader(LWJGLShaderBackend()) {
     val model by uniform()
 
-    val albedo by uniform()
-    val metallic by uniform()
-    val roughness by uniform()
-    val ao by uniform()
+    val albedo by uniform(structure = "material")
+    val metallic by uniform(structure = "material")
+    val roughness by uniform(structure = "material")
+    val ao by uniform(structure = "material")
 
     val constants by uniformBlock(0)
 
