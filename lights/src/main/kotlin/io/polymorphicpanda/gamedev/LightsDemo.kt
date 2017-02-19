@@ -1,6 +1,9 @@
 package io.polymorphicpanda.gamedev
 
 import io.polymorphicpanda.gamedev.shader.UniformBufferManager
+import io.polymorphicpanda.gamedev.system.CameraSystem
+import io.polymorphicpanda.gamedev.system.CubeMoveSystem
+import io.polymorphicpanda.gamedev.system.RenderSystem
 import org.lwjgl.glfw.GLFW.GLFW_OPENGL_CORE_PROFILE
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11

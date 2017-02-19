@@ -1,5 +1,6 @@
-package io.polymorphicpanda.gamedev
+package io.polymorphicpanda.gamedev.system
 
+import io.polymorphicpanda.gamedev.GameState
 import io.polymorphicpanda.gamedev.component.Cube
 import io.polymorphicpanda.gamedev.shader.PBRShader
 import io.polymorphicpanda.gamedev.shader.UniformBufferManager
