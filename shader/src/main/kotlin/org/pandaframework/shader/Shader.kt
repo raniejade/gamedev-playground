@@ -115,7 +115,7 @@ abstract class Shader(val backend: ShaderBackend,
         }
 }
 
-inline fun <reified T: Shader> using(shader: T, block: () -> Unit) {
+inline fun <reified T: Shader> bind(shader: T, block: () -> Unit) {
     with(shader.backend) {
         useProgram(shader.program)
         block.invoke()

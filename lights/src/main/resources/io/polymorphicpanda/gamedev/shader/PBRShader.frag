@@ -5,13 +5,24 @@ out vec4 fragColor;
 
 const float PI = 3.14159265359;
 
+layout (std140) uniform constants
+{
+    mat4 projection;        // 0
+                            // 16
+                            // 32
+                            // 48
+    mat4 view;              // 64
+                            // 80
+                            // 96
+                            // 112
+    vec3 cameraPosition;    // 128
+};
+
 // material properties
 uniform vec3 albedo = vec3(0.026f, 0.246f, 0.026f);
 uniform float metallic = 0.0f;
 uniform float roughness = 0.3f;
 uniform float ambientOcclusion = 1.0f;
-
-uniform vec3 cameraPosition;
 
 uniform vec3 lightPosition = vec3(0.0f, 2.0f, 2.0f);
 uniform vec3 lightColor = vec3(1.0f);

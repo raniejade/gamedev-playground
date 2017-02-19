@@ -20,6 +20,8 @@ dependencies {
     compile 'org.lwjgl:lwjgl-stb'
     compile 'org.lwjgl:lwjgl-opengl'
 
+    compile 'org.pandaframework:panda-ecs'
+
     compile 'org.joml:joml'
 
     runtime group: 'org.lwjgl', name: 'lwjgl', classifier: "natives-${project.ext.os}"

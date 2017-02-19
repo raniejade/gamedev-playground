@@ -13,7 +13,7 @@ import org.pandaframework.application.glfw.backend.Backend
 import org.pandaframework.application.glfw.backend.opengl.OpenGLBackend
 import org.pandaframework.lwjgl.BYTES
 import org.pandaframework.lwjgl.stackPush
-import org.pandaframework.shader.using
+import org.pandaframework.shader.bind
 import kotlin.properties.Delegates
 
 class BasicGame: GLFWApplicationListener() {
@@ -114,7 +114,7 @@ class BasicGame: GLFWApplicationListener() {
         val time = glfwGetTime()
         rotation += Math.toRadians(Math.sin(time)).toFloat()
 
-        using(shader) {
+        bind(shader) {
             val greenValue = Math.sin(time / 2) + 0.5f
             val redValue = Math.cos(time / 2) + 0.5f
             GL20.glUniform4f(shader.ourColor, redValue.toFloat(), greenValue.toFloat(), 0.0f, 1.0f)

@@ -15,5 +15,7 @@ dependencyManagement {
         }
 
         dependency 'org.joml:joml:1.9.1'
+        
+        dependency 'org.pandaframework:panda-ecs:0.1.0'
     }
 }

@@ -11,7 +11,6 @@ import org.pandaframework.shader.uniformBlock
  */
 class PBRShader: Shader(LWJGLShaderBackend()) {
     val model by uniform()
-    val cameraPosition by uniform()
     val constants by uniformBlock(0)
 
     override val version: ShaderVersion
