@@ -67,7 +67,7 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness) {
     return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
-vec3 reflectanceEquation(vec3 N, vec3 V, vec3 F, vec3 kS, vec3 kD, vec3 lightPosition, vec3 lightColor,
+vec3 reflectanceEquation(vec3 N, vec3 V, vec3 F, vec3 kD, vec3 lightPosition, vec3 lightColor,
                          vec3 fragPosition, Material material) {
      // light direction
     vec3 L = normalize(lightPosition - fragPosition);
@@ -104,10 +104,10 @@ void main() {
     vec3 kD = vec3(1.0) - kS;
     kD *= 1.0 - material.metallic;
 
-    vec3 Lo = reflectanceEquation(N, V, F, kS, kD, lightPosition, lightColor, fragPosition, material);
-    Lo += reflectanceEquation(N, V, F, kS, kD,  vec3(0.0f, 1.0f, -1.0f), lightColor, fragPosition, material);
-    Lo += reflectanceEquation(N, V, F, kS, kD,  vec3(0.0f, 1.0f, 0.0f), lightColor, fragPosition, material);
-    Lo += reflectanceEquation(N, V, F, kS, kD,  vec3(0.0f, 0.0f, 0.0f), lightColor, fragPosition, material);
+    vec3 Lo = reflectanceEquation(N, V, F, kD, lightPosition, lightColor, fragPosition, material);
+    Lo += reflectanceEquation(N, V, F, kD,  vec3(0.0f, 1.0f, -1.0f), lightColor, fragPosition, material);
+    Lo += reflectanceEquation(N, V, F, kD,  vec3(0.0f, 1.0f, 0.0f), lightColor, fragPosition, material);
+    Lo += reflectanceEquation(N, V, F, kD,  vec3(0.0f, 0.0f, 0.0f), lightColor, fragPosition, material);
 
     vec3 ambient = vec3(0.03) * material.albedo * material.ao;
     vec3 color = ambient + Lo;

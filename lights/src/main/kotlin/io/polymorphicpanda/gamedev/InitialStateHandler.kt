@@ -28,7 +28,7 @@ class InitialStateHandler: StateHandler<GameState.Initial>() {
             with(materialMapper.get(this)) {
                 albedo.set(0.026f, 0.246f, 0.026f)
                 metallic = 0.1f
-                roughness = 0.025f
+                roughness = 0.04f
             }
 
             entities.add(this)
