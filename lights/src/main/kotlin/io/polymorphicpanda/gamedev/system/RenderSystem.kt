@@ -33,6 +33,7 @@ import kotlin.properties.Delegates
 class RenderSystem(private val uniformBufferManager: UniformBufferManager): System<GameState>(), IteratingSystem {
     private val shader = PBRShader()
     private var vao: Int by Delegates.notNull()
+    private var planeVao: Int by Delegates.notNull()
     private val modelMatrix = Matrix4f()
 
     private val cubeMapper: Mapper<Cube> by mapper()
@@ -180,6 +181,39 @@ class RenderSystem(private val uniformBufferManager: UniformBufferManager): Syst
         val vao = GL30.glGenVertexArrays()
         val vbo = GL15.glGenBuffers()
 
+
+        stackPush {
+            GL30.glBindVertexArray(vao)
+
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo)
+            mallocFloat(vertices.size).let {
+                it.put(vertices)
+                it.flip()
+                GL15.glBufferData(GL15.GL_ARRAY_BUFFER, it, GL15.GL_STATIC_DRAW)
+            }
+
+            GL20.glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 6 * Float.BYTES, 0L)
+            GL20.glEnableVertexAttribArray(0)
+
+            GL20.glVertexAttribPointer(1, 3, GL11.GL_FLOAT, false, 6 * Float.BYTES, 3L * Float.BYTES)
+            GL20.glEnableVertexAttribArray(1)
+
+            GL30.glBindVertexArray(0)
+        }
+
+        return vao
+    }
+
+    private fun setupPlaneVao(): Int {
+        val vertices = floatArrayOf(
+            -5.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f,
+            5.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f,
+            -5.0f, 0.0f, 5.0f, 0.0f, 1.0f, 0.0f,
+            5.0f, 0.0f, 5.0f, 0.0f, 1.0f, 0.0f
+        )
+
+        val vao = GL30.glGenVertexArrays()
+        val vbo = GL15.glGenBuffers()
 
         stackPush {
             GL30.glBindVertexArray(vao)
