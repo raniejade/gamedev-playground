@@ -1,3 +1,5 @@
+#define MAX_LIGHTS 255
+
 in vec3 fragNormal;
 in vec3 fragPosition;
 
@@ -5,8 +7,19 @@ out vec4 fragColor;
 
 const float PI = 3.14159265359;
 
-layout (std140) uniform constants
-{
+struct Material {
+    vec3 albedo;
+    float metallic;
+    float roughness;
+    float ao;
+};
+
+struct Light {
+    vec3 position; // 16
+    vec3 color; // 32
+};
+
+layout (std140) uniform constants {
     mat4 projection;        // 0
                             // 16
                             // 32
@@ -18,11 +31,9 @@ layout (std140) uniform constants
     vec3 cameraPosition;    // 128
 };
 
-struct Material {
-    vec3 albedo;
-    float metallic;
-    float roughness;
-    float ao;
+layout (std140) uniform lights {
+    int numLights;              // 0
+    Light spotLights[MAX_LIGHTS];   // 16
 };
 
 
@@ -104,10 +115,11 @@ void main() {
     vec3 kD = vec3(1.0) - kS;
     kD *= 1.0 - material.metallic;
 
-    vec3 Lo = reflectanceEquation(N, V, F, kD, lightPosition, lightColor, fragPosition, material);
-    Lo += reflectanceEquation(N, V, F, kD,  vec3(0.0f, 1.0f, -1.0f), lightColor, fragPosition, material);
-    Lo += reflectanceEquation(N, V, F, kD,  vec3(0.0f, 1.0f, 0.0f), lightColor, fragPosition, material);
-    Lo += reflectanceEquation(N, V, F, kD,  vec3(0.0f, 0.0f, 0.0f), lightColor, fragPosition, material);
+    vec3 Lo = vec3(0.0f);
+    for (int i = 0; i < numLights; i++) {
+        Light light = spotLights[i];
+        Lo += reflectanceEquation(N, V, F, kD, light.position, light.color, fragPosition, material);
+    }
 
     vec3 ambient = vec3(0.03) * material.albedo * material.ao;
     vec3 color = ambient + Lo;

@@ -1,11 +1,13 @@
 package io.polymorphicpanda.gamedev.system
 
 import io.polymorphicpanda.gamedev.GameState
+import io.polymorphicpanda.gamedev.Light
 import io.polymorphicpanda.gamedev.component.Cube
 import io.polymorphicpanda.gamedev.component.Material
 import io.polymorphicpanda.gamedev.shader.PBRShader
 import io.polymorphicpanda.gamedev.shader.UniformBufferManager
 import org.joml.Matrix4f
+import org.joml.Vector3f
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL15
 import org.lwjgl.opengl.GL20
@@ -35,6 +37,8 @@ class RenderSystem(private val uniformBufferManager: UniformBufferManager): Syst
 
     private val cubeMapper: Mapper<Cube> by mapper()
     private val materialMapper: Mapper<Material> by mapper()
+
+    private val lights = mutableListOf<Light>()
 
     // we reuse this buffer every time we upload
     // matrix data to OpenGL
@@ -85,9 +89,43 @@ class RenderSystem(private val uniformBufferManager: UniformBufferManager): Syst
         vao = setupCubeVao()
         matrixBuffer = MemoryUtil.memAllocFloat(16)
 
-        with(uniformBufferManager) {
-            GL30.glBindBufferRange(GL31.GL_UNIFORM_BUFFER, shader.constants, constants, 0, constantsBlockSize)
+        with(lights) {
+            add(Light(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(1.0f)))
+            add(Light(Vector3f(0.0f, 1.0f, -1.0f), Vector3f(1.0f)))
+            add(Light(Vector3f(0.0f, 1.0f, 0.0f), Vector3f(1.0f)))
+            add(Light(Vector3f(0.0f, 1.0f, 1.0f), Vector3f(1.0f)))
+            add(Light(Vector3f(1.0f, 1.0f, 1.0f), Vector3f(1.0f)))
+            add(Light(Vector3f(-1.0f, 1.0f, 1.0f), Vector3f(1.0f)))
+            add(Light(Vector3f(1.0f, -1.0f, 1.0f), Vector3f(1.0f)))
         }
+
+        stackPush {
+            val countBuffer = mallocInt(1)
+            countBuffer.put(lights.size)
+            countBuffer.flip()
+
+            // we only use 6 floats (3 for position, 3 for color)
+            // but since vec3 is 4N aligned we pad each vec3 with N
+            // making it act like a vec4
+            val buffer = mallocFloat(lights.size * 8)
+            lights.forEachIndexed { index, (position, color) ->
+                val offset = index * 8
+                position.get(offset, buffer)
+                color.get(offset + 4, buffer)
+            }
+
+            with(uniformBufferManager) {
+                GL15.glBindBuffer(GL31.GL_UNIFORM_BUFFER, lights)
+                GL15.glBufferSubData(GL31.GL_UNIFORM_BUFFER, 0, countBuffer)
+                GL15.glBufferSubData(GL31.GL_UNIFORM_BUFFER, 16, buffer)
+                GL15.glBindBuffer(GL31.GL_UNIFORM_BUFFER, 0)
+
+                GL30.glBindBufferRange(GL31.GL_UNIFORM_BUFFER, shader.constants, constants, 0, constantsBlockSize)
+                GL30.glBindBufferRange(GL31.GL_UNIFORM_BUFFER, shader.lights, lights, 0, lightsBlockSize)
+            }
+        }
+
+
     }
 
     override fun cleanup() {

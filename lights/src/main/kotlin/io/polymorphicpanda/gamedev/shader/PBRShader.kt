@@ -18,6 +18,7 @@ class PBRShader: Shader(LWJGLShaderBackend()) {
     val ao by uniform(structure = "material")
 
     val constants by uniformBlock(0)
+    val lights by uniformBlock(1)
 
     override val version: ShaderVersion
         get() = ShaderVersion("330", ShaderVersion.Profile.Core)
