@@ -40,6 +40,8 @@ class LightsDemo: GLFWApplicationListener() {
         GL11.glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
 
         world.setup()
+
+        cameraSystem.adjustProjection(getWidth(), getHeight())
     }
 
     override fun cleanup() {
