@@ -1,7 +1,13 @@
 package org.pandaframework.application.glfw
 
-import org.lwjgl.glfw.*
 import org.lwjgl.glfw.GLFW.*
+import org.lwjgl.glfw.GLFWCursorPosCallback
+import org.lwjgl.glfw.GLFWErrorCallback
+import org.lwjgl.glfw.GLFWFramebufferSizeCallback
+import org.lwjgl.glfw.GLFWKeyCallback
+import org.lwjgl.glfw.GLFWMouseButtonCallback
+import org.lwjgl.glfw.GLFWVidMode
+import org.lwjgl.glfw.GLFWWindowSizeCallback
 import org.lwjgl.system.MemoryUtil.NULL
 import org.pandaframework.application.Application
 import org.pandaframework.application.ApplicationPeer
@@ -95,6 +101,7 @@ class GLFWApplication(val backend: Backend): Application<GLFWApplicationPeer, GL
         glfwSetKeyCallback(window, keyCallback)
         glfwSetCursorPosCallback(window, cursorPositionCallback)
         glfwSetMouseButtonCallback(window, mouseClickCallback)
+        glfwSetFramebufferSizeCallback(window, framebufferResizeCallback)
 
         glfwMakeContextCurrent(window)
         backend.setupContext()
@@ -107,6 +114,7 @@ class GLFWApplication(val backend: Backend): Application<GLFWApplicationPeer, GL
         resizeCallback.free()
         cursorPositionCallback.free()
         mouseClickCallback.free()
+        framebufferResizeCallback.free()
         glfwTerminate()
     }
 

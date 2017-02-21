@@ -2,10 +2,10 @@ package io.polymorphicpanda.gamedev.system
 
 import io.polymorphicpanda.gamedev.GameState
 import io.polymorphicpanda.gamedev.component.Cube
+import io.polymorphicpanda.gamedev.component.Transform
 import org.joml.Math
 import org.pandaframework.ecs.aspect.AspectBuilder
 import org.pandaframework.ecs.entity.Entity
-import org.pandaframework.ecs.entity.Mapper
 import org.pandaframework.ecs.system.IteratingSystem
 import org.pandaframework.ecs.system.System
 import org.pandaframework.ecs.system.UpdateStrategies
@@ -17,7 +17,8 @@ private const val RADIUS = 1.0f
  * @author Ranie Jade Ramiso
  */
 class CubeMoveSystem: System<GameState>(), IteratingSystem {
-    private val cubeMapper: Mapper<Cube> by mapper()
+    private val cubeMapper by mapper<Cube>()
+    private val transformMapper by mapper<Transform>()
 
     override val supportedStates: Array<GameState>
         get() = arrayOf(GameState.Initial)
@@ -33,12 +34,12 @@ class CubeMoveSystem: System<GameState>(), IteratingSystem {
     }
 
     override fun update(time: Double, entity: Entity) {
-        with(cubeMapper.get(entity)) {
-            rotation.integrate(time.toFloat(), 0.0f, 1.0f, 0.0f)
-            angle += time
+        val cube = cubeMapper.get(entity)
+        cube.angle += time
 
-            position.x = (Math.sin(angle) * RADIUS).toFloat()
-            position.z = (Math.cos(angle) * RADIUS).toFloat()
+        with(transformMapper.get(entity)) {
+            position.x = (Math.sin(cube.angle) * RADIUS).toFloat()
+            position.z = (Math.cos(cube.angle) * RADIUS).toFloat()
         }
     }
 }

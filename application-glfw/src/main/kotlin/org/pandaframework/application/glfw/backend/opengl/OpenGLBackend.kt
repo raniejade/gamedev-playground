@@ -10,9 +10,14 @@ class OpenGLBackend private constructor(
     val version: Pair<Int, Int>?,
     val profile: Int,
     val forwardCompatible: Boolean,
-    val vsync: Boolean
+    val vsync: Boolean,
+    val sampleSize: Int
 ): Backend {
     override fun setupWindowHints() {
+
+        if (sampleSize > 0) {
+            glfwWindowHint(GLFW_SAMPLES, sampleSize)
+        }
 
         if (version != null) {
             glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, version.first)
@@ -41,6 +46,7 @@ class OpenGLBackend private constructor(
         private var profile = GLFW_OPENGL_ANY_PROFILE
         private var vsync = true
         private var forwardCompatible = false
+        private var sampleSize = 0
 
         fun version(major: Int, minor: Int): Builder {
             version = Pair(major, minor)
@@ -57,12 +63,17 @@ class OpenGLBackend private constructor(
             return this
         }
 
+        fun sampleSize(size: Int): Builder {
+            sampleSize = size
+            return this
+        }
+
         fun forwardCompatible(enabled: Boolean): Builder {
             forwardCompatible = enabled
             return this
         }
 
-        fun build() = OpenGLBackend(version, profile, forwardCompatible, vsync)
+        fun build() = OpenGLBackend(version, profile, forwardCompatible, vsync, sampleSize)
     }
 
     companion object {

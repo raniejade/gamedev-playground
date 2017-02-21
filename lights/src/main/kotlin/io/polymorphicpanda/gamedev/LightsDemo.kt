@@ -36,9 +36,6 @@ class LightsDemo: GLFWApplicationListener() {
     override fun setup() {
         GL.createCapabilities(false)
 
-        GL11.glEnable(GL11.GL_DEPTH_TEST)
-        GL11.glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
-
         world.setup()
 
         cameraSystem.adjustProjection(getWidth(), getHeight())
@@ -66,6 +63,7 @@ fun main(vararg args: String) {
     val backend: Backend = OpenGLBackend.create()
         .version(3, 3)
         .profile(GLFW_OPENGL_CORE_PROFILE)
+        .sampleSize(4)
         .forwardCompatible(true) /* true for OSX */
         .build()
 

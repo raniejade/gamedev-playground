@@ -18,7 +18,7 @@ import kotlin.properties.Delegates
  * @author Ranie Jade Ramiso
  */
 class CameraSystem(private val uniformBufferManager: UniformBufferManager): System<GameState>(), UpdateStrategy {
-    private val cameraPosition = Vector3f(0.0f, 2.0f, -3.0f)
+    private val cameraPosition = Vector3f(0.0f, 15.0f, -5.0f)
 
     private val viewMatrix = Matrix4f()
     private val projectionMatrix = Matrix4f()

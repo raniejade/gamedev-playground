@@ -4,11 +4,14 @@ import io.polymorphicpanda.gamedev.GameState
 import io.polymorphicpanda.gamedev.Light
 import io.polymorphicpanda.gamedev.component.Cube
 import io.polymorphicpanda.gamedev.component.Material
+import io.polymorphicpanda.gamedev.component.Plane
+import io.polymorphicpanda.gamedev.component.Transform
 import io.polymorphicpanda.gamedev.shader.PBRShader
 import io.polymorphicpanda.gamedev.shader.UniformBufferManager
 import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.lwjgl.opengl.GL11
+import org.lwjgl.opengl.GL13
 import org.lwjgl.opengl.GL15
 import org.lwjgl.opengl.GL20
 import org.lwjgl.opengl.GL30
@@ -17,6 +20,7 @@ import org.lwjgl.system.MemoryUtil
 import org.pandaframework.ecs.aspect.AspectBuilder
 import org.pandaframework.ecs.entity.Entity
 import org.pandaframework.ecs.entity.Mapper
+import org.pandaframework.ecs.system.BasicSystem
 import org.pandaframework.ecs.system.IteratingSystem
 import org.pandaframework.ecs.system.System
 import org.pandaframework.ecs.system.UpdateStrategies
@@ -30,14 +34,16 @@ import kotlin.properties.Delegates
 /**
  * @author Ranie Jade Ramiso
  */
-class RenderSystem(private val uniformBufferManager: UniformBufferManager): System<GameState>(), IteratingSystem {
+class RenderSystem(private val uniformBufferManager: UniformBufferManager): System<GameState>(), BasicSystem {
     private val shader = PBRShader()
-    private var vao: Int by Delegates.notNull()
+
+    private var cubeVao: Int by Delegates.notNull()
     private var planeVao: Int by Delegates.notNull()
     private val modelMatrix = Matrix4f()
+    private val transformMapper: Mapper<Transform> by mapper()
 
-    private val cubeMapper: Mapper<Cube> by mapper()
     private val materialMapper: Mapper<Material> by mapper()
+    private val cubeMapper: Mapper<Cube> by mapper()
 
     private val lights = mutableListOf<Light>()
 
@@ -50,19 +56,23 @@ class RenderSystem(private val uniformBufferManager: UniformBufferManager): Syst
 
     override fun updateStrategy(): UpdateStrategy {
         return with(UpdateStrategies) {
-            iterating(this@RenderSystem)
+            basic(this@RenderSystem)
         }
     }
 
-    override fun AspectBuilder.aspect() {
-        allOf(Cube::class, Material::class)
+    override fun update(time: Double, entities: IntArray) {
+        GL11.glClear(GL11.GL_COLOR_BUFFER_BIT or GL11.GL_DEPTH_BUFFER_BIT)
+        entities.forEach(this::render)
     }
 
-    override fun update(time: Double, entity: Entity) {
-        GL11.glClear(GL11.GL_COLOR_BUFFER_BIT or GL11.GL_DEPTH_BUFFER_BIT)
+    override fun AspectBuilder.aspect() {
+        allOf(Transform::class, Material::class)
+        anyOf(Cube::class, Plane::class)
+    }
 
+    fun render(entity: Entity) {
         bind(shader) {
-            with(cubeMapper.get(entity)) {
+            with(transformMapper.get(entity)) {
                 modelMatrix.translation(position)
                     .get(matrixBuffer)
 
@@ -80,18 +90,25 @@ class RenderSystem(private val uniformBufferManager: UniformBufferManager): Syst
                 GL20.glUniform1f(shader.ao, ao)
             }
 
+            val (vao, count) = if (cubeMapper.contains(entity)) {
+                cubeVao to 36
+            } else {
+                planeVao to 6
+            }
+
             GL30.glBindVertexArray(vao)
-            GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, 36)
+            GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, count)
             GL30.glBindVertexArray(0)
         }
     }
 
     override fun setup() {
-        vao = setupCubeVao()
+        cubeVao = setupCubeVao()
+        planeVao = setupPlaneVao()
         matrixBuffer = MemoryUtil.memAllocFloat(16)
 
         with(lights) {
-            add(Light(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(1.0f)))
+            add(Light(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(1.0f, 0.0f, 1.0f)))
             add(Light(Vector3f(0.0f, 1.0f, -1.0f), Vector3f(1.0f)))
             add(Light(Vector3f(0.0f, 1.0f, 0.0f), Vector3f(1.0f)))
             add(Light(Vector3f(0.0f, 1.0f, 1.0f), Vector3f(1.0f)))
@@ -126,7 +143,9 @@ class RenderSystem(private val uniformBufferManager: UniformBufferManager): Syst
             }
         }
 
-
+        GL11.glEnable(GL11.GL_DEPTH_TEST)
+        GL11.glEnable(GL13.GL_MULTISAMPLE)
+        GL11.glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
     }
 
     override fun cleanup() {
@@ -178,40 +197,25 @@ class RenderSystem(private val uniformBufferManager: UniformBufferManager): Syst
             -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
         )
 
-        val vao = GL30.glGenVertexArrays()
-        val vbo = GL15.glGenBuffers()
-
-
-        stackPush {
-            GL30.glBindVertexArray(vao)
-
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo)
-            mallocFloat(vertices.size).let {
-                it.put(vertices)
-                it.flip()
-                GL15.glBufferData(GL15.GL_ARRAY_BUFFER, it, GL15.GL_STATIC_DRAW)
-            }
-
-            GL20.glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 6 * Float.BYTES, 0L)
-            GL20.glEnableVertexAttribArray(0)
-
-            GL20.glVertexAttribPointer(1, 3, GL11.GL_FLOAT, false, 6 * Float.BYTES, 3L * Float.BYTES)
-            GL20.glEnableVertexAttribArray(1)
-
-            GL30.glBindVertexArray(0)
-        }
-
-        return vao
+        return setupVao(vertices)
     }
 
     private fun setupPlaneVao(): Int {
         val vertices = floatArrayOf(
+            -5.0f, 0.0f, 5.0f, 0.0f, 1.0f, 0.0f,
+            5.0f, 0.0f, 5.0f, 0.0f, 1.0f, 0.0f,
+            -5.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f,
+
             -5.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f,
             5.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f,
-            -5.0f, 0.0f, 5.0f, 0.0f, 1.0f, 0.0f,
             5.0f, 0.0f, 5.0f, 0.0f, 1.0f, 0.0f
+
         )
 
+        return setupVao(vertices)
+    }
+
+    private fun setupVao(vertices: FloatArray): Int {
         val vao = GL30.glGenVertexArrays()
         val vbo = GL15.glGenBuffers()
 
