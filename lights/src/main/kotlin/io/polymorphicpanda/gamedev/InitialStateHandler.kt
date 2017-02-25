@@ -37,8 +37,8 @@ class InitialStateHandler: StateHandler<GameState.Initial>() {
         cubeBluePrint.create().apply {
             with(materialMapper.get(this)) {
                 albedo.set(0.026f, 0.246f, 0.026f)
-                metallic = 0.1f
-                roughness = 0.04f
+                metallic = 0.0f
+                roughness = 0.025f
             }
 
             entities.add(this)
@@ -46,8 +46,8 @@ class InitialStateHandler: StateHandler<GameState.Initial>() {
 
         planeBluePrint.create().apply {
             with(materialMapper.get(this)) {
-                albedo.set(1.0f)
-                metallic = 1.0f
+                albedo.set(0.78f, 0.54f, 0.38f)
+                metallic = 0.0f
                 roughness = 0.025f
             }
 

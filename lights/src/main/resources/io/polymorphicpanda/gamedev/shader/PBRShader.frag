@@ -39,8 +39,8 @@ layout (std140) uniform lights {
 
 uniform Material material;
 
-uniform vec3 lightPosition = vec3(0.0f, 2.0f, 2.0f);
-uniform vec3 lightColor = vec3(1.0f);
+uniform vec3 lightPosition;
+uniform vec3 lightColor;
 
 float DistributionGGX(vec3 N, vec3 H, float roughness) {
     float a      = roughness*roughness;
@@ -103,6 +103,26 @@ vec3 reflectanceEquation(vec3 N, vec3 V, vec3 F, vec3 kD, vec3 lightPosition, ve
     return (kD * material.albedo / PI + brdf) * radiance * NdotL;
 }
 
+vec3 reflectanceEquationDirLight(vec3 N, vec3 V, vec3 F, vec3 kD, vec3 L, vec3 lightColor,
+                         vec3 fragPosition, Material material) {
+    // view direction
+    vec3 H = normalize(V + L);
+    vec3 radiance  = lightColor;
+
+    // cook-torrance brdf
+    float NDF = DistributionGGX(N, H, material.roughness);
+    float G   = GeometrySmith(N, V, L, material.roughness);
+
+    vec3 nominator    = NDF * G * F;
+    float denominator = 4 * max(dot(V, N), 0.0) * max(dot(L, N), 0.0) + 0.001;
+    vec3 brdf = nominator / denominator;
+
+    // add to outgoing radiance Lo
+    float NdotL = max(dot(N, L), 0.0);
+
+    return (kD * material.albedo / PI + brdf) * radiance * NdotL;
+}
+
 void main() {
     vec3 N = normalize(fragNormal);
     vec3 V = normalize(cameraPosition - fragPosition);
@@ -120,6 +140,9 @@ void main() {
         Light light = spotLights[i];
         Lo += reflectanceEquation(N, V, F, kD, light.position, light.color, fragPosition, material);
     }
+
+//    vec3 dirLight = normalize(-vec3(1.0f, -0.5f, -0.3f));
+//    Lo += reflectanceEquationDirLight(N, V, F, kD, dirLight, vec3(1.0f, 0.54f, 0.623f), fragPosition, material);
 
     vec3 ambient = vec3(0.03) * material.albedo * material.ao;
     vec3 color = ambient + Lo;
