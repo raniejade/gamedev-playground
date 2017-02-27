@@ -39,9 +39,6 @@ layout (std140) uniform lights {
 
 uniform Material material;
 
-uniform vec3 lightPosition;
-uniform vec3 lightColor;
-
 float DistributionGGX(vec3 N, vec3 H, float roughness) {
     float a      = roughness*roughness;
     float a2     = a*a;
@@ -78,17 +75,8 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness) {
     return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
-vec3 reflectanceEquation(vec3 N, vec3 V, vec3 F, vec3 kD, vec3 lightPosition, vec3 lightColor,
-                         vec3 fragPosition, Material material) {
-     // light direction
-    vec3 L = normalize(lightPosition - fragPosition);
-    // view direction
+vec3 reflectanceEquation(vec3 N, vec3 V, vec3 L, vec3 F, vec3 kD, vec3 radiance, Material material) {
     vec3 H = normalize(V + L);
-    // distance between current fragment and light
-    float distance    = length(lightPosition - fragPosition);
-    float attenuation = 1.0 / (distance * distance);
-    vec3 radiance     = lightColor * attenuation;
-
     // cook-torrance brdf
     float NDF = DistributionGGX(N, H, material.roughness);
     float G   = GeometrySmith(N, V, L, material.roughness);
@@ -103,24 +91,12 @@ vec3 reflectanceEquation(vec3 N, vec3 V, vec3 F, vec3 kD, vec3 lightPosition, ve
     return (kD * material.albedo / PI + brdf) * radiance * NdotL;
 }
 
-vec3 reflectanceEquationDirLight(vec3 N, vec3 V, vec3 F, vec3 kD, vec3 L, vec3 lightColor,
-                         vec3 fragPosition, Material material) {
-    // view direction
-    vec3 H = normalize(V + L);
-    vec3 radiance  = lightColor;
+vec3 computeSpotLightRadiance(vec3 lightPosition, vec3 lightColor, vec3 fragPosition) {
+    // distance between current fragment and light
+    float distance    = length(lightPosition - fragPosition);
+    float attenuation = 1.0 / (distance * distance);
 
-    // cook-torrance brdf
-    float NDF = DistributionGGX(N, H, material.roughness);
-    float G   = GeometrySmith(N, V, L, material.roughness);
-
-    vec3 nominator    = NDF * G * F;
-    float denominator = 4 * max(dot(V, N), 0.0) * max(dot(L, N), 0.0) + 0.001;
-    vec3 brdf = nominator / denominator;
-
-    // add to outgoing radiance Lo
-    float NdotL = max(dot(N, L), 0.0);
-
-    return (kD * material.albedo / PI + brdf) * radiance * NdotL;
+    return lightColor * attenuation;
 }
 
 void main() {
@@ -136,13 +112,19 @@ void main() {
     kD *= 1.0 - material.metallic;
 
     vec3 Lo = vec3(0.0f);
+    // spot lights
     for (int i = 0; i < numLights; i++) {
         Light light = spotLights[i];
-        Lo += reflectanceEquation(N, V, F, kD, light.position, light.color, fragPosition, material);
+        vec3 L = normalize(light.position - fragPosition);
+        vec3 radiance = computeSpotLightRadiance(light.position, light.color, fragPosition);
+        Lo += reflectanceEquation(N, V, L, F, kD, radiance, material);
     }
 
-    vec3 dirLight = normalize(-vec3(1.0f, -0.5f, -0.3f));
-    Lo += reflectanceEquationDirLight(N, V, F, kD, dirLight, vec3(1.0f), fragPosition, material);
+    // directional lights
+    vec3 dirLight = normalize(vec3(1.0f, -0.5f, -0.3f));
+    vec3 L = -dirLight;
+    vec3 radiance = vec3(1.0f);
+    Lo += reflectanceEquation(N, V, L, F, kD, radiance, material);
 
     vec3 ambient = vec3(0.03) * material.albedo * material.ao;
     vec3 color = ambient + Lo;
