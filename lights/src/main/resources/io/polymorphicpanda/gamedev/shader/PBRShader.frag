@@ -141,8 +141,8 @@ void main() {
         Lo += reflectanceEquation(N, V, F, kD, light.position, light.color, fragPosition, material);
     }
 
-//    vec3 dirLight = normalize(-vec3(1.0f, -0.5f, -0.3f));
-//    Lo += reflectanceEquationDirLight(N, V, F, kD, dirLight, vec3(1.0f, 0.54f, 0.623f), fragPosition, material);
+    vec3 dirLight = normalize(-vec3(1.0f, -0.5f, -0.3f));
+    Lo += reflectanceEquationDirLight(N, V, F, kD, dirLight, vec3(1.0f), fragPosition, material);
 
     vec3 ambient = vec3(0.03) * material.albedo * material.ao;
     vec3 color = ambient + Lo;
